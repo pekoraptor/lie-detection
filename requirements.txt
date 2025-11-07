@@ -1,4 +1,5 @@
 absl-py==2.3.1
+antlr4-python3-runtime==4.9.3
 asttokens==3.0.0
 attrs==25.4.0
 certifi==2025.10.5
@@ -20,12 +21,14 @@ fsspec==2025.10.0
 idna==3.11
 ipykernel==7.1.0
 ipython==8.37.0
+ipywidgets==8.1.8
 jax==0.6.2
 jaxlib==0.6.2
 jedi==0.19.2
 Jinja2==3.1.6
 jupyter_client==8.6.3
 jupyter_core==5.9.1
+jupyterlab_widgets==3.0.16
 kiwisolver==1.4.9
 MarkupSafe==3.0.3
 matplotlib==3.10.7
@@ -48,6 +51,7 @@ nvidia-cusparse-cu12==12.1.0.106
 nvidia-nccl-cu12==2.18.1
 nvidia-nvjitlink-cu12==12.9.86
 nvidia-nvtx-cu12==12.1.105
+omegaconf==2.3.0
 opencv-contrib-python==4.12.0.88
 opencv-python==4.11.0.86
 opt_einsum==3.4.0
@@ -80,6 +84,7 @@ sympy==1.14.0
 torch==2.1.2
 torchvision==0.16.2
 tornado==6.5.2
+tqdm==4.67.1
 traitlets==5.14.3
 triton==2.1.0
 typing_extensions==4.15.0
@@ -88,3 +93,4 @@ ultralytics==8.3.225
 ultralytics-thop==2.0.18
 urllib3==2.5.0
 wcwidth==0.2.14
+widgetsnbextension==4.0.15
