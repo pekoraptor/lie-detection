@@ -211,3 +211,4 @@ __marimo__/
 # datasets
 data/
 processed_data/
+model_weights/
