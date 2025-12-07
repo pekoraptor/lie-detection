@@ -13,7 +13,7 @@ class Attention(nn.Module):
         context = torch.sum(weights * lstm_out, dim=1)
         return context, weights
 
-class LieDetector(nn.Module):
+class LieDetectionModel(nn.Module):
     def __init__(self, input_dim=17, hidden_dim=64, num_layers=2, dropout=0.3):
         super().__init__()
 
