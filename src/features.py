@@ -1,7 +1,7 @@
 import joblib
 import numpy as np
 import torch
-from .config import SCALERS_PATH, RAW_COLS, SCALE_COLS, HEAD_POSE_COLS, BOX_COLS, EMOTION_COLS, FLOW_COLS, LANDMARKS_COLS
+from .config import SCALERS_PATH, RAW_COLS, SCALE_GROUPS, HEAD_POSE_COLS, BOX_COLS, EMOTION_COLS, FLOW_COLS, LANDMARKS_COLS
 
 FACE_TOP = 10
 FACE_BOTTOM = 152
@@ -58,10 +58,11 @@ def preprocess_video_data(df):
     except FileNotFoundError:
         raise FileNotFoundError(f"Scalers file not found at {SCALERS_PATH}. Please ensure the file exists.")
 
-    for col in SCALE_COLS:
-        scaler = scalers[col]
-        values = df[col].values.reshape(-1, 1)
-        df[col] = scaler.transform(values).flatten()
+    for group in SCALE_GROUPS:
+        first_col_name = group[0]
+        if first_col_name in scalers:
+            scaler = scalers[first_col_name]
+            df[group] = scaler.transform(df[group].values)
 
     smooth_cols = HEAD_POSE_COLS + BOX_COLS
     for col in smooth_cols:

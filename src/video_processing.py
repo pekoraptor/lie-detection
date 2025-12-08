@@ -143,7 +143,7 @@ class VideoProcessor:
             "flow_std_y": float(flow[...,1].std())
         }
 
-    def process_segment(self, video_cap, start_frame, end_frame, label, sample_id):
+    def process_video(self, video_cap, start_frame, end_frame, label, sample_id):
         results = []
         
         video_cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)

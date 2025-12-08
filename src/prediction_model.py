@@ -31,5 +31,6 @@ class LieDetector:
             return {
                 'probability': prob,
                 'is_deceptive': is_deceptive,
+                'threshold': self.threshold,
                 'attention_weights': attention_weights.cpu().numpy()
             }
