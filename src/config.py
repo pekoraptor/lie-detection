@@ -11,7 +11,7 @@ def find_project_root(anchor_file="LICENSE"):
     raise FileNotFoundError(f"Could not find project root containing {anchor_file}")
 
 PROJECT_ROOT = find_project_root()
-LIE_DETECTOR_PATH = PROJECT_ROOT / 'model_weights' / 'best_model_finetuned.pt'
+LIE_DETECTOR_PATH = PROJECT_ROOT / 'model_weights' / 'final_model.pt'
 FACE_DETECTOR_PATH = PROJECT_ROOT / 'model_weights' / 'yolov8n-face.pt'
 SCALERS_PATH = PROJECT_ROOT / 'model_weights' / 'scalers.joblib'
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'

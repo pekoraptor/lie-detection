@@ -10,8 +10,8 @@ from .config import FACE_DETECTOR_PATH, DEVICE
 
 
 class VideoProcessor:
-    def __init__(self, frame_skip=5):
-        self.frame_skip = frame_skip
+    def __init__(self):
+        self.frame_skip = 1
         self.face_detector = YOLO(FACE_DETECTOR_PATH).to(DEVICE)
         self.emotion_detector = EmotionRecognition(device='gpu' if DEVICE == 'cuda' else 'cpu')
         self.mp_face_mesh = mp.solutions.face_mesh

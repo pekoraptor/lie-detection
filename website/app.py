@@ -73,12 +73,15 @@ if uploaded_file is not None:
 
         cap = cv2.VideoCapture(video_path)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
 
         progress_bar = st.progress(0)
         status_text = st.empty()
 
         try:
             status_text.text("Processing video frames...")
+
+            video_processor.frame_skip = int(fps / 30) if fps > 30 else 1
 
             video_data = video_processor.process_video(video_cap=cap, start_frame=0, end_frame=total_frames, label=0, sample_id="live_inference")
             
