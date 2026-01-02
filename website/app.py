@@ -2,7 +2,7 @@ import streamlit as st
 import cv2
 import tempfile
 import pandas as pd
-import os 
+import os
 import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -20,33 +20,36 @@ from src.prediction_model import LieDetector
 
 st.set_page_config(page_title="AI Lie Detector", page_icon="🕵️", layout="centered")
 
+
 @st.cache_resource
 def load_resources():
-    video_processor = VideoProcessor(frame_skip=5)
+    video_processor = VideoProcessor()
     lie_detector = LieDetector()
     return video_processor, lie_detector
+
 
 def visualize_attention_weights(weights, fps=30, frame_skip=5):
     time_axis = np.arange(len(weights)) / fps * frame_skip
 
     fig, ax = plt.subplots(figsize=(10, 3))
-    ax.plot(time_axis, attention_weights, color='#FF4B4B', linewidth=2)
-    
-    ax.fill_between(time_axis, attention_weights, color='#FF4B4B', alpha=0.3)
-    
-    ax.set_xlabel('Video Time (seconds)')
-    ax.set_ylabel('Model Attention Level')
-    ax.set_title('Which moments did the model focus on?')
-    ax.grid(True, linestyle='--', alpha=0.5)
-    
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+    ax.plot(time_axis, attention_weights, color="#FF4B4B", linewidth=2)
+
+    ax.fill_between(time_axis, attention_weights, color="#FF4B4B", alpha=0.3)
+
+    ax.set_xlabel("Video Time (seconds)")
+    ax.set_ylabel("Model Attention Level")
+    ax.set_title("Which moments did the model focus on?")
+    ax.grid(True, linestyle="--", alpha=0.5)
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     st.pyplot(fig)
-    
+
     max_attn_idx = np.argmax(attention_weights)
     peak_time = time_axis[max_attn_idx]
     st.info(f"💡 The model paid the most attention around **{peak_time:.1f} seconds**.")
+
 
 try:
     video_processor, lie_detector = load_resources()
@@ -83,8 +86,14 @@ if uploaded_file is not None:
 
             video_processor.frame_skip = int(fps / 30) if fps > 30 else 1
 
-            video_data = video_processor.process_video(video_cap=cap, start_frame=0, end_frame=total_frames, label=0, sample_id="live_inference")
-            
+            video_data = video_processor.process_video(
+                video_cap=cap,
+                start_frame=0,
+                end_frame=total_frames,
+                label=0,
+                sample_id="live_inference",
+            )
+
             progress_bar.progress(50)
 
             if len(video_data) == 0:
@@ -98,7 +107,7 @@ if uploaded_file is not None:
 
                 progress_bar.progress(75)
                 status_text.text("Predicting deception likelihood...")
-                
+
                 result = lie_detector.predict(input_tensor)
 
                 progress_bar.progress(100)
@@ -109,23 +118,27 @@ if uploaded_file is not None:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    st.metric("Deception Probability", f"{result['probability']*100:.2f}%")
-                
+                    st.metric(
+                        "Deception Probability", f"{result['probability']*100:.2f}%"
+                    )
+
                 with col2:
-                    if result['is_deceptive']:
+                    if result["is_deceptive"]:
                         st.error("Lie Detected")
                     else:
                         st.success("No Lie Detected")
-                
+
                 st.caption(f"Threshold used: {result['threshold']*100:.2f}%")
-                st.progress(result['probability'])
+                st.progress(result["probability"])
 
                 with st.expander("Attention Weights Visualization"):
-                    attention_weights = result['attention_weights'].squeeze()
+                    attention_weights = result["attention_weights"].squeeze()
                     fps = cap.get(cv2.CAP_PROP_FPS)
                     if fps == 0:
                         fps = 30
-                    visualize_attention_weights(attention_weights, fps, video_processor.frame_skip)
+                    visualize_attention_weights(
+                        attention_weights, fps, video_processor.frame_skip
+                    )
         except Exception as e:
             st.error(f"An error occurred during analysis: {e}")
         finally:
