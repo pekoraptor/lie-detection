@@ -34,7 +34,7 @@
     studies: "pl",
     /// Language in which your thesis is written, influences the rest of the text (i.e.
     /// abstracts order, captions/references supplements, hyphenation etc).
-    thesis: "en"
+    thesis: "pl"
   )
 
   show: wut-thesis.with(
@@ -68,10 +68,28 @@
     ),
     abstract: (
       en: [
-        @silesian
+        The aim of the thesis was to examine the effectiveness of computer vision methods in the automatic assessment of veracity based on video recording analysis. The thesis presents various approaches to the problem and describes the development of a tool enabling machine learning model inference on recordings provided by the end user.
+        
+        The research utilized two datasets: the Silesian Deception Detection Dataset and the Real-Life Deception Detection Dataset. Tools from libraries such as MediaPipe, OpenCV, and FacialEmotionRecognition were used for feature extraction from video recordings, including facial landmarks, optical flow, and emotion probabilities.
+
+        Three modeling approaches were considered: the classic Random Forest machine learning algorithm, a 3D Convolutional Neural Network (3D-CNN), and the ultimately selected bidirectional recurrent GRU network with an attention mechanism. Extensive feature engineering and transfer learning techniques (pre-training on one dataset and fine-tuning on another) were employed in the training process to improve the model's generalization capabilities.
+
+        The conducted experiments showed that the Random Forest model allowed for the identification of the most prominent behavioral features accompanying deception (e.g., eye movements), while the recurrent network achieved promising results in time series analysis, reaching an AUC of 0.63 on the Silesian dataset, which exceeds the detection capabilities of an average human.
+
+        An integral part of the thesis is a web application developed in the Streamlit framework, allowing the user to upload a video file and receive the model's prediction. The results suggest that computer vision methods can support the credibility assessment process; however, potential practical applications require high-quality, representative training data.
       ],
       pl: [
-        @real_life_ddd
+        Celem pracy było zbadanie skuteczności metod wizji komputerowej w automatycznej ocenie prawdomówności osób na podstawie analizy nagrań wideo. W pracy przedstawiono różne podejścia do problemu oraz utworzono docelowe narzędzie umożliwiające inferencję modelu uczenia maszynowego na nagraniach zamieszczonych przez użytkownika końcowego w celu oceny prawdomówności.
+
+        W badaniach wykorzystano dwa zbiory danych: Silesian Deception Detection Dataset oraz Real-Life Deception Detection Dataset. Do ekstrakcji cech z nagrań wideo, takich jak punkty charakterystyczne twarzy, przepływ optyczny, prawdopodobieństwa wystąpienia emocji, zastosowano narzędzia z bibliotek: MediaPipe, OpenCV, FacialEmotionRecognition.
+
+        Rozważono trzy podejścia modelowe: klasyczny algorytm uczenia maszynowego Random Forest, trójwymiarową sieć neuronową konwolucyjną 3D-CNN oraz finalnie wybraną dwukierunkową sieć rekurencyjną GRU z mechanizmem atencji. W procesie uczenia wykorzystano ekstensywną inżynierię cech oraz technikę transfer learningu (uczenie na jednym zbiorze i dotrenowanie na drugim) w celu poprawy zdolności generalizacji modelu.
+
+        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych, towarzyszących kłamstwu (np. ruchy oczu), natomiast sieć rekurencyjna osiągnęła obiecujące wyniki w analizie sekwencji czasowych, finalnie uzyskując AUC na poziomie 0.63 na zbiorze @silesian, co znacznie przewyższa zdolności przeciętnego człowieka.
+
+        Integralną częścią pracy jest aplikacja webowa oparta na frameworku Streamlit, pozwalająca użytkownikowi na wgranie pliku wideo i otrzymanie predykcji modelu.
+
+        Wyniki badań sugerują, że metody wizji komputerowej mogą wspomagać proces oceny wiarygodności wypowiedzi, jednak potencjalne praktyczne zastosowania wymagają bardzo dużo reprezentatywnych danych treningowych wysokiej jakości.
       ]
     ),
     keywords: (
@@ -88,7 +106,7 @@
 
   // --- Main Chapters ---
   // include "content/Tutorial.typ" // Some trivial, but useful snippets
-  // include "content/Introduction.typ"
+  include "content/Introduction.typ"
   // include "content/LiteratureReview.typ"
   // include "content/Methodology.typ"
   // include "content/DataCollection.typ"
