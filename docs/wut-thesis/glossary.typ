@@ -3,13 +3,13 @@
 #let glossary = (
   (
     key: "silesian",
-    short: "Silesian Deception Detection Dataset",
+    short: "SDDD",
     long: "Silesian Deception Detection Dataset",
     description: "Zbiór danych zawierający nagrania wideo przedstawiające osoby mówiące prawdę, bądź kłamiące. Nagrania powstały z użyciem profesjonalnej kamery w kontrolowanych warunkach laboratoryjnych na Politechnice Śląskiej.",
   ),
   (
     key: "real_life_ddd",
-    short: "Real-Life Deception Detection Dataset",
+    short: "RLDDD",
     long: "Real-Life Deception Detection Dataset",
     description: "Zbiór danych zawierający nagrania wideo z prawdziwych sytuacji, w których osoby były nagrywane podczas mówienia prawdy lub kłamstwa. Nagrania pochodzą z różnych źródeł, takich jak programy telewizyjne, wywiady czy materiały z procesu sądowego. Są gorszej jakości niż nagrania z Silesian Deception Detection Dataset, lecz bardziej reprezentatywne dla rzeczywistych sytuacji.",
   )

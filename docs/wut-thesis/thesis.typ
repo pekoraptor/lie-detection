@@ -85,7 +85,7 @@
 
         Rozważono trzy podejścia modelowe: klasyczny algorytm uczenia maszynowego Random Forest, trójwymiarową sieć neuronową konwolucyjną 3D-CNN oraz finalnie wybraną dwukierunkową sieć rekurencyjną GRU z mechanizmem atencji. W procesie uczenia wykorzystano ekstensywną inżynierię cech oraz technikę transfer learningu (uczenie na jednym zbiorze i dotrenowanie na drugim) w celu poprawy zdolności generalizacji modelu.
 
-        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych, towarzyszących kłamstwu (np. ruchy oczu), natomiast sieć rekurencyjna osiągnęła obiecujące wyniki w analizie sekwencji czasowych, finalnie uzyskując AUC na poziomie 0.63 na zbiorze @silesian, co znacznie przewyższa zdolności przeciętnego człowieka.
+        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych, towarzyszących kłamstwu (np. ruchy oczu), natomiast sieć rekurencyjna osiągnęła obiecujące wyniki w analizie sekwencji czasowych, finalnie uzyskując AUC na poziomie 0.63 na zbiorze Silesian Deception Detection Dataset, co znacznie przewyższa zdolności przeciętnego człowieka.
 
         Integralną częścią pracy jest aplikacja webowa oparta na frameworku Streamlit, pozwalająca użytkownikowi na wgranie pliku wideo i otrzymanie predykcji modelu.
 
