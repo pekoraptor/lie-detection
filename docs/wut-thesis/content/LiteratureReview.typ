@@ -1,23 +1,24 @@
 #import "../utils.typ": todo, silentheading, flex-caption
 
-= Literature Review
-#todo[Replace this chapter!]
-== Overview of Feline Behavior
+= Teoria i przegląd literatury <literature-review>
+Niniejszy rozdział ma na celu zdefiniowanie podstaw teoretycznych, które zostały bezpośrednio wykorzystane w dalszych rozdziałach pracy i ma służyć jako wprowadzenie do zagadnień związanych z tematyką kłamstwa i jego automatycznej detekcji z użyciem wizji komputerowej oraz uczenia maszynowego. Ten projekt naturalnie łączy wiedzę z różnych dziedzin naukowych, w tym psychologii behawioralnej, inżynierii oprogramowania i sztucznej inteligencji. Dlatego, aby zapewnić czytelnikowi pełne zrozumienie kontekstu i podstaw teoretycznych, rozdział ten obejmuje zagadnienia ze wszystkich tych obszarów. 
 
-Feline behavior has been a subject of interest in animal behavior research, though often overshadowed by studies focusing on dogs. Research has highlighted the domestic cat's unique blend of independence and social interaction. Key studies have documented general behaviors such as purring, kneading, and scratching, as well as their implications for cat health and well-being @Bradshaw2012. However, these studies often overlook the more nuanced aspects of how these behaviors impact human interactions.
+Na początku omówione zostanie w jaki sposób kłamstwo formułowane jest w ludzkim umyśle i po czym można rozpoznać jego zaistnienie w zachowaniu niewerbalnym. Następnie, wytłumaczone zostaną podstawowe metody wizji komputerowej wykorzystywane do analizy cech, takich jak mimika twarzy czy ruchy ciała. Kolejna sekcja przedstawi działanie wybranych algorytmów uczenia maszynowego, które zostały zastosowane w pracy jako modele klasyfikacyjne. Na koniec zaprezentowany zostanie przegląd istniejących już rozwiązań w dziedzinie automatycznej analizy wiarygodności wypowiedzi (_state of the art_), co stanowi punkt odniesienia dla podejścia zaproponowanego w tej pracy.
 
-== Human-Animal Interactions
+== Psychologiczne aspekty kłamstwa <psychological-aspects-of-lie-detection>
+=== Formalna definicja kłamstwa <definition-of-lie>
+Według Alderta Vrija kłamstwo definiuje się jako "świadomą próbę wywołania u innej osoby przekonania, które sam mówiący uważa za nieprawdziwe"  @vrij_detecting_lies_2008. Oznacza to, że akt skłamania wiąże się z intencją - zwykła pomyłka nie jest kłamstwem w sensie psychologicznym, pomimo iż wypowiadane słowa są fałszywe. Podobnie, aktor grający pewną rolę także mówi nieprawdę, ale nie uznaje się tego za kłamstwo, gdyż widzowie na wstępie zakładają, że sztuka niekoniecznie jest faktem. Psychologicznie takie sytuacje są zupełnie odmienne dla mózgu człowieka wypowiadającego się, co przejawia się w jego zachowaniu. Różnice te mogą być wychwycone i sklasyfikowane przez system wizyjny nieznający kontekstu wypowiedzi ani obiektywnej prawdy.
 
-The field of human-animal interactions has provided valuable insights into the bond between pets and their owners. Research shows that animals, including cats, can influence human emotions and behaviors through various mechanisms @Odendaal2000. Studies on dogs have revealed that they can alter human social interactions and emotional states, suggesting similar potential for cats. However, the specific ways in which cats employ behavioral strategies to manipulate human behavior have not been thoroughly examined @Horwitz2010.
+=== Teoria obciążenia poznawczego (ang. _Cognitive Load Theory_)
+Miron Zuckerman zaproponował teorię obciążenia poznawczego zakładającą, że kłamstwo jest znacznie bardziej wymagające mentalnie niż mówienie prawdy @zuckerman_verbal_nonverbal_1981. Kłamca musi jednocześnie tworzyć spójną i wiarygodną fałszywą narrację, zapamiętując jej szczegóły, tym samym hamując prawdę. Dodatkowo, stara się kontrolować swoją mowę ciała, żeby zminimalizować ryzyko ujawnienia nieszczerości, obserwując w tym samym czasie reakcję rozmówcy. 
 
-== Comparative Studies: Cats vs. Dogs
+Próba równoczesnego skupienia się na tylu zadaniach prowadzi do przeciążenia mózgu, który w efekcie ogranicza zasoby przeznaczone na nieświadomą kontrolę ciała. Skutkuje to widocznymi zmianami mowy ciała, m.in. w częstotliwości mrugania, które staje się rzadsze w czasie wypowiadania kłamstwa (efekt skupienia), a chwilę po skończeniu wypowiedzi następuje znaczne jego przyspieszenie (efekt kompensacji). Ponadto, ciało oraz głowa kłamiącego wykazują się nienaturalną sztywnością - zastygają one w bezruchu na rzecz podświadomej próby uniknięcia wykonania gestu, który mógłby zasugerować rozmówcy, iż jest on okłamywany.
 
-Comparative studies between cats and dogs reveal differences in their interactions with humans. Dogs, as pack animals, tend to engage in more overtly cooperative and submissive behaviors, which are well-documented and studied. In contrast, cats, as solitary hunters, exhibit a more subtle and independent approach to their interactions @Serpell2017. While dogs have been shown to use behaviors such as eye contact and body language to solicit attention and cooperation, cats often rely on more covert tactics, such as strategic vocalizations and selective affection @McComb2009.
+=== Hipoteza przecieku prawdziwych emocji (ang. _Leakage Hypothesis_)
 
-== Theories of Animal Manipulation
 
-Theories of animal manipulation suggest that animals use various strategies to influence human behavior. For example, the "manipulative attachment theory" posits that pets use attachment behaviors to elicit caregiving responses from their owners. In cats, these behaviors might include specific vocalizations, body movements, and patterns of attention-seeking @Turner2017. However, existing research primarily focuses on the general impact of these behaviors rather than the specific strategies cats use to achieve their goals.
+== Metody wizji komputerowej w analizie twarzy <computer-vision-in-face-analysis>
 
-== Gaps in the Literature
+== Algorytmy uczenia maszynowego stosowane w rozpoznawaniu kłamstwa <machine-learning-algorithms-for-lie-detection>
 
-Despite the considerable research on domestic animals, significant gaps remain in understanding the precise ways in which cats manipulate their human companions. While there is some research on general feline behavior, there is limited investigation into how these behaviors are used strategically to influence human actions @Horwitz2010. The subtle nature of feline manipulation, combined with the focus on more overt animal behaviors, has resulted in a lack of comprehensive studies examining the detailed tactics cats use and their effects on human behavior and household dynamics.
+== Przegląd istniejących rozwiązań w detekcji kłamstwa <state-of-the-art-in-lie-detection>

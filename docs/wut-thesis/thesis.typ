@@ -107,7 +107,7 @@
   // --- Main Chapters ---
   // include "content/Tutorial.typ" // Some trivial, but useful snippets
   include "content/Introduction.typ"
-  // include "content/LiteratureReview.typ"
+  include "content/LiteratureReview.typ"
   // include "content/Methodology.typ"
   // include "content/DataCollection.typ"
   // include "content/Analysis.typ"

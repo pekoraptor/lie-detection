@@ -35,8 +35,8 @@ Realizacja zamierzonego celu wymagała przeprowadzenia szeregu prac badawczych i
   - zaprojektowanie efektywnego procesu uczenia, poprzez dobór odpowiednich funkcji straty, optymalizatorów i strategii treningowych.
 + przeprowadzenie eksperymentów badawczych, obejmujących:
   - strojenie hiperparametrów
-  - analiza ważności cech
-  - inzynieria cech
+  - analizę ważności cech
+  - inzynierię cech
   - weryfikację skuteczności techniki _transfer learningu_
   - porównanie skuteczności różnych rozwiązań
 + stworzenie interfejsu dla użytkownika końcowego z wykorzystaniem frameworku Streamlit, umożliwiającego praktyczne zastosowanie finalnie wybranego rozwiązania.
