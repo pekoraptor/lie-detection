@@ -117,13 +117,56 @@ W przeciwieństwie do sieci neuronowych (często określanych jako "czarne skrzy
 
 W niniejszej pracy, algorytm ten został użyty jako model bazowy (ang. _baseline_) w celu oszacowania dolnej granicy skuteczności i był traktowany jako punkt odniesienia dla bardziej złożonego, finalnie wybranego modelu.
 
-=== Rekurencyjne sieci neuronowe (_Recurrent Neural Networks_) <recurrent-neural-networks>
+=== Rekurencyjne sieci neuronowe (_RNN - Recurrent Neural Networks_) <recurrent-neural-networks>
+Kłamstwo to proces dynamiczny naturalnie umiejscowiony w czasie. Ze względu na to, do dokładnego wykrywania go wymagany jest model rozumiejący zależności czasowe i sekwencyjność kolejnych klatek nagrań wideo. Takim modelem jest rekurencyjna sieć neuronowa, przetwarzająca dane jako sekwencje kroków czasowych, gdzie stan w chwili bieżącej jest zależny od stanu go poprzedzającego. 
 
-=== Dwukierunkowość i mechanizm atencji <bidirectional-and-attention-mechanism>
+Takie działanie osiągane jest za sprawą zastosowanej pętli sprzężenia zwrotnego, w której wyjście neuronu $y_t$ wraca do niego jako wejście w kolejnym kroku czasowym. Stan ukryty (ang. _hidden state_) $h_t$ służy jako "pamięć" sieci. W każdym kroku czasowym $t$ obliczany jest on korzystając z aktualnego wejścia $x_t$ (cechy z bieżącej klatki) i stanu ukrytego z poprzedniego kroku $h_(t-1)$. W przeciwieństwie do tradycyjnych sieci neuronowych, gdzie każda warstwa ma oddzielne wagi, w RNN te same wagi używane są w każdym kroku czasowym, co pozwala na przetwarzanie sekwencji o dowolnej długości. 
 
-=== Alternatywne podejście: trójwymiarowe konwolucyjne sieci neuronowe <3D-CNN>
+#figure(
+  image("../images/rnn.drawio.pdf", width: 85%),
+  caption: [
+    Schemat sieci rekurencyjnej (RNN). 
+    Po lewej: reprezentacja zwinięta z pętlą sprzężenia zwrotnego. 
+    Po prawej: reprezentacja rozwinięta w czasie, ukazująca przepływ informacji (stanu ukrytego) przez kolejne kroki sekwencji. 
+    Źródło: opracowanie własne na podstawie @goodfellow_deep_learning_2016.
+  ],
+) <rnn_unrolled>
 
+Trening takiej sieci bazuje na "rozwinięciu" jej w czasie, tworząc bardzo głęboką sieć, gdzie każda warstwa to jeden krok czasowy. Aby umożliwić naukę sieci, po przepuszczeniu przez nią sekwencji obliczany jest błąd, według którego aktualizowane są wagi, cofając się do początku sekwencji. Jest to algorytm BPTT (_Back Propagation Through Time_). Ponieważ wagi sieci neuronowej często są małymi liczbami (mniejszymi niż 1), mnożenie ich przez siebie setki razy (w przypadku długich sekwencji) w trakcie propagacji wstecznej powoduje wykładnicze malenie gradientu. Nazywane jest to problemem zanikającego gradientu @bengio_vanishing_1994, który skutkuje tym, że wagi na początku sekwencji przestają się aktualizować, a w konsekwencji na wynik predykcji długiej sekwencji najmocniej wpływają kroki czasowe z jej końca, a informacja z jej początku "zanika".
 
+Jak wcześniej zauważono, klasyczne sieci RNN mają krótką pamięć. Problem ten rozwiązują architektury bramkowe, takie jak LSTM (_Long Short Term Memory_) zaprojektowany przez Hochreitera i Schmidhubera w celu usunięcia zanikających gradientów @hochreiter_lstm_1997. Wprowadza on dodatkowy przepływ informacji między kolejnymi krokami czasowymi w postaci stanu komórki (ang. _cell state_) $C_t$, pozwalający pamiętać informację na długich odcinkach sekwencji. Dzięki mechanizmowi bramkowania (ang. _gating_), LSTM potrafi decydować co zapomnieć, a co zapamiętać za pomocą struktur zwanych bramkami. Występują trzy ich rodzaje:
+- *Bramka Zapominania* (_Forget Gate_): na podstawie wejścia $x_t$ oraz stanu ukrytego z poprzedniego kroku $h_(t-1)$ decyduje, co wyrzucić ze stanu komórki.
+- *Bramka Wejściowa* (_Input Gate_): Decyduje, jakie nowe informacje zapisać w stanie komórki.
+- *Bramka Wyjściowa* (_Output Gate_): Decyduje, co z obecnego stanu komórki zapisać do stanu ukrytego, przekazując do kolejnego kroku jako $h_t$.
 
+Bramki wprowadzają znaczne usprawnienie działania rekurencyjnych sieci neuronowych, ale tym samym LSTM ma niezwykle dużo trenowalnych parametrów, przez co proces jego uczenia jest utrudniony i wymaga większej ilości danych treningowych. Architektura GRU (_Gated Recurrent Unit_) została opracowana przez Kyunghyuna Cho w celu optymalizacji i uproszczenia LSTM @cho_gru_2014. Łączy ona stan ukryty i stan komórki w jedno, ale korzysta z bramek w celu ochrony przed zanikającymi gradientami. W przeciwieństwie do LSTM, gdzie są trzy bramki, w GRU są tylko dwie:
+- *Bramka Aktualizacji* (_Update Gate_) $z_t$: Jednocześnie pełni rolę bramki zapominania i wejściowej z LSTM. Decyduje, w jakim stosunku brać pod uwagę poprzedni stan ukryty i aktualne wejście.
+- *Bramka Resetu* (_Reset Gate_) $r_t$: Pozwala sieci całkowicie porzucić poprzedni stan ukryty, resetując pamięć krótkotrwałą, jeśli uzna go za nieistotny dla aktualnego stanu.
+
+Standardowe sieci rekurencyjne przetwarzają sekwencje chronologicznie, przez co decyzja sieci w danym momencie zależy tylko od kroków czasowych go poprzedzających. Z uwagi na fakt, że w pracy tej analizowane pod kątem prawdomówności są istniejące już nagrania, a celem nie jest utworzenie systemu czasu rzeczywistego, postawnowiono wzbogacić architekturę GRU o działanie dwukierunkowe, tworząc architekturę Bi-GRU @schuster_bidirectional_1997. Składa się ona z dwóch oddzielnych warstw, z których jedna przetwarza nagranie w przód, a druga w tył. W takim podejściu, finalna reprezentacja pojedynczej klatki jest wynikiem konkatenacji wektorów wyjściowych obu warstw. Dzięki temu, model uczy się pełnego kontekstu zachowania i uzyskuje zdolność odróżnienia akcji, które z pozoru w danym momencie są identyczne, ale biorąc pod uwagę kontekst przyszłości posiadają zupełnie odmienne podłoża psychologiczne.
+
+Według teorii Ekmana opisanej wcześniej w #link(<psychological-aspects-of-lie-detection>)[przeglądzie literatury psychologicznej], kłamstwo często zostaje zdradzone w ułamku sekundy. Analizowane nagrania jednak, często mają długość osiągającą nawet minutę, zawierając długie nieinformatywne momenty ciszy i bezruchu. Tworzy to utrudnienie w procesie generowania predykcji, gdyż informacje o wystąpieniu mikroekspresji (często ze środka nagrania), ulegają zatarciu w finalnym wektorze stanu ukrytego (problem wąskiego gardła, ang. _information bottleneck_). Rozwiązaniem tego problemu jest mechanizm atencji, pozwalający sieci podejmować decyzję na podstawie wszystkich klatek jednocześnie @bahdanau_attention_2014. Sieć uczy się przypisywać każdej z nich wagę (z zakresu $[0, 1]$), gdzie wysoka wartość świadczy o ważności tego momentu, a niska często jest przypisywana właśnie do chwil, w których nie dzieje się zbyt dużo. Za sprawą normalizacji Softmax, wagi sumują się do 1, co pozwala interpretować je jako prawdopodobieństwo wystąpienia istotnej informacji w danym kroku czasowym.
+
+Liczne zalety tej architektury, w których zawiera się mniejsza liczba parametrów, szybszy trening i mniejsze ryzyko przeuczenia na mniejszych zbiorach (takich jak @silesian) przy zachowaniu skuteczności porównywalnej z LSTM, zadecydowały o oparciu finalnego rozwiązania w tej pracy na architekturze GRU rozszerzonej o dwukierunkowość i mechanizm atencji.
+
+#figure(
+  image("../images/gru.drawio.pdf", width: 90%),
+  caption: [
+    Schemat komórki GRU (_Gated Recurrent Unit_). 
+    Widoczny przepływ sygnałów przez bramkę resetu ($r_t$) oraz bramkę aktualizacji ($z_t$). 
+    Symbol $sigma$ oznacza funkcję aktywacji sigmoidalną, a $tanh$ tangens hiperboliczny.
+    Źródło: opracowanie własne na podstawie @cho_gru_2014.
+  ],
+) <gru_cell>
+
+=== Alternatywne podejście: trójwymiarowe konwolucyjne sieci neuronowe (3D-CNN) <3D-CNN>
+Jako alternatywa do RNN, rozważono użycie trójwymiarowych konwolucyjnych sieci neuronowych (3D-CNN) @tran_c3d_2015. Klasyczne sieci konwolucyjne CNN (używane np. w YOLO) operują bezpośrednio na obrazach. Ich trójwymiarowy odpowiednik rozszerza operację splotu (konwolucji) o trzeci wymiar - czas. Takie podejście eliminuje potrzebę skomplikowanego przetwarzania wstępnego, ponieważ sieć bezpośrednio z nagrań uczy się jednocześnie wyglądu obiektów i ich ruchu. Nie jest to jednak rozwiązanie bez wad. Tak skomplikowany model jest bardzo ciężki obliczeniowo, a efektywne wytrenowanie go wymaga tysięcy, a nawet milionów nagrań. Dziedzina detekcji kłamstwa cierpi na deficyt danych, a publicznie dostępne zbiory liczą zaledwie setki próbek. Z tego powodu, zdecydowano się na porzucenie prób modelowania opartych na tej architekturze.
 
 == Przegląd istniejących rozwiązań w detekcji kłamstwa <state-of-the-art-in-lie-detection>
+Początkowe próby zastosowania algorytmów uczenia maszynowego do automatycznej detekcji kłamstwa opierały się na klasycznych metodach wizji komputerowej. Dane zostawały poddane ręcznej ekstrakcji cech geometrycznych i tekstur, a nastepnie były używane do trenowania klasyfikatorów - maszyn wektorów nośnych (SVM) lub drzew decyzyjnych. Przykładem takiego podejścia jest praca @pfister_2011, w której wykorzystano deskryptor LBP-TOP (_Local Binary Patterns from Three Orthogonal Planes_) do analizy czasoprzestrzennych zmian tekstury twarzy, używając klasyfikatora SVM. Rozwiązania te, choć przełomowe na tamten okres (ok. 2010-2015), były bardzo podatne na błędy wynikające z nieoptymalnych warunków oświetlenia i przemieszczeń kamery.
+
+Przełom nastąpił wraz z popularyzacją głębokiego uczenia (ang. _deep learning_). Kluczową pracą z tego okresu jest jest publikacja Pérez-Rosas et al. @perez_rosas_real_life_2015, w ramach której utworzono zbiór Real-life Trial Dataset, zawierający nagrania z prawdziwych rozpraw sądowych. W swoich eksperymentach, autorzy wykorzystali drzewa decyzyjne oraz lasy losowe do klasyfikacji próbek składających się z cech językowych (wyekstrahowanych z transkrypcji) oraz wizualnych: m.in. trajektorie ruchów głowy i dłoni oraz detekcja uśmiechów. Badania te wykazały, że automatyczne systemy oparte na ekstrakcji cech wizualnych są w stanie osiągnąć skuteczność nawet 75%, znacząco przewyższając ludzką percepcję (wcześniej wspomniane 54%).
+
+Współczesne podejścia ewoluowały w stronę analizy multimodalnej, jednocześnie biorąc pod uwagę nie tylko obraz z kamery, ale także dźwięk (między innymi ton głosu) oraz treść wypowiedzi (korzystając z technik przetwarzania języka naturalnego, ang. _NLP_ - _Natural Language Processing_). Prace takie jak Gogate @gogate_deep_learning_2017 wykorzystały potężne architektury łączące sieci konwolucyjne CNN z mechanizmami atencji, pobijając wcześniejsze próby zautomatyzowania procesu oceny prawdomówności wypowiedzi, osiągając skuteczność rzędu 80%.
+
+Równocześnie istniejący nurt badawczy wskazuje jednak, że to właśnie kanał wizualny dostarcza najwięcej unikalnych i trudnych do sfałszowania sygnałów (w postaci "przecieków emocjonalnych"), na co wskazuje literatura poświęcona detekcji mikroekspresji @wu_micro_expression_2017. Uzasadnia to skupienie się w niniejszej pracy na analizie wideo z wykorzystaniem metod wizji komputerowej w postaci m. in. Optical Flow oraz sekwencyjności rekurencyjnych sieci neuronowych.
