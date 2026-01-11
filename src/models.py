@@ -16,7 +16,7 @@ class Attention(nn.Module):
 
 
 class LieDetectionModel(nn.Module):
-    def __init__(self, input_dim=23, hidden_dim=64, num_layers=2, dropout=0.3):
+    def __init__(self, input_dim=23, hidden_dim=16, num_layers=2, dropout=0.4):
         super().__init__()
 
         self.lstm = nn.GRU(

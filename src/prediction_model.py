@@ -13,21 +13,16 @@ class LieDetector:
 
     def _load_model(self):
         try:
-            # Force the weights to load into CPU memory first to avoid the CUDA check
             checkpoint = torch.load(
                 self.model_path,
                 map_location=torch.device("cpu"),
-                weights_only=False,  # Ensure this is False if using older torch versions
+                weights_only=False,
             )
 
-            # Initialize model architecture
-            # Note: Ensure input_dim matches your training (23)
-            self.model = LieDetectionModel(input_dim=23, hidden_dim=32, dropout=0.5)
+            self.model = LieDetectionModel(input_dim=23, hidden_dim=16, dropout=0.4)
 
-            # Load the weights into the architecture
             self.model.load_state_dict(checkpoint["model_state_dict"])
 
-            # Now move the entire model to your Mac's GPU (MPS)
             self.model.to(self.device)
             self.model.eval()
 
