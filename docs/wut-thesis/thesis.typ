@@ -109,7 +109,7 @@
   include "content/Introduction.typ"
   include "content/LiteratureReview.typ"
   // include "content/Methodology.typ"
-  // include "content/DataCollection.typ"
+  include "content/Data.typ"
   // include "content/Analysis.typ"
   // include "content/Conclusion.typ"
 
