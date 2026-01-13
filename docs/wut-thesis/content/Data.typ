@@ -31,10 +31,104 @@ To właśnie te ograniczenia sprawiają, że zbiór ten jest idealnym zasobem te
 
 Etykiety przykładów z tego zbioru zostały przypisane na podstawie ostatecznych werdyktów sądowych oraz zweryfikowanych przez policję faktów. Choć system sądowniczy nie jest perfekcyjnie wiarygodny i nieomylny, jest to najlepsze przybliżenie prawdy dostępne dla danych rzeczywistych.
 
-== Strategia podziału danych i walidacji <data-split-strategy>
+Porównanie przykładowych klatek z obu zbiorów zostało przedstawione na #link(<datasets-comparison>)[obrazku poniżej].
+
+#figure(
+  grid(
+    columns: (1fr, 1.335fr),
+    gutter: 3mm,
+    image("../images/example_frames/silesian.png", width: 100%),
+    image("../images/example_frames/real_life.png", width: 100%),
+  ),
+  caption: [
+    Porównanie jakości próbek w wykorzystanych zbiorach danych. 
+    Po lewej: przykładowa klatka ze zbioru @silesian - widoczne idealne oświetlenie, jednolite tło i statyczna pozycja. 
+    Po prawej: przykładowa klatka ze zbioru @real_life_ddd - niska rozdzielczość, małe zbliżenie i niejednolite tło.
+  ],
+) <datasets-comparison>
 
 == Potok przetwarzania obrazu <image-processing-pipeline>
+=== Cel potoku i zastosowanie downsamplingu <pipeline-purpose>
+Celem przedstawionego potoku jest transformacja surowego nagrania wideo w ustrukturyzowany zbiór wyekstrahowanych cech numerycznych w postaci wektorów, które mogą być podane do sieci neuronowej. Proces odbywa się klatka po klatce, ale z zastosowaniem downsamplingu. Sieci rekurencyjne nie radzą sobie z bardzo długimi sekwencjami. Z tego powodu zdecydowano się na analizę co n-tej klatki w celu redukcji wymiarowości finalnych wektorów. Pozwoliło to także na ujednolicenie szybkości nagrań pochodzących z obu zbiorów. W przypadku @silesian zawierającego nagrania w stu klatkach na sekundę, brano co dziesiątą klatkę, a w przypadku @real_life_ddd, gdzie nagrania mają 30 fps (_frames per second_) - co trzecią klatkę. Dzięki temu finalne wektory pochodzące z obu zbiorów mają jednolitą liczbę wartości cech na sekundę (10), a zatem percepcja czasu sieci rekurencyjnej będzie zachowana. W przypadku niezastosowania takiego ujednolicenia, ruchy i zdarzenia z obu zbiorów znacznie różniłyby się szybkością, co mogłoby być nieoptymalne dla skuteczności modelu.
+
+=== Segmentacja nagrań wideo <video-segmentation>
+W przypadku zbioru @silesian kluczowe było odpowiednie podzielenie nagrań na próbki, gdyż oryginalne wideo zawierają dziesięć wypowiedzi, co jest jednoznaczne z dziesięcioma próbkami danych. W tym celu utworzono parser plików `.eaf`, w których zawarte były znaczniki czasowe (ang. _timestamps_) pojedynczych wypowiedzi. 
+Nagrania ze zbioru @real_life_ddd natomiast, zostały potraktowane jako pojedyncze segmenty.
+
+=== Lokalizacja i izolacja twarzy <face-localization-and-isolation>
+Wykorzystano model YOLOv8-nano do detekcji twarzy i wycięcia obszaru zainteresowania (region twarzy) z całej klatki. Dzięki temu zabiegowi, tło tworzące nieistotny szum zostaje usunięte. Wykadrowany ROI (_Region of Interest_) zostaje przeskalowany do rozdzielczości 224x224 pikseli, która jest standardem dla większości architektur sieci neuronowych (w tym MediaPipe FaceMesh oraz model używany do detekcji emocji).
+
+=== Ekstrakcja punktów charakterystycznych i normalizacja geometryczna twarzy <landmark-extraction-and-geometric-normalization>
+Mediapipe FaceMesh został zastosowany w celu ekstrakcji współrzędnych punktów charakterystycznych twarzy. Na ich podstawie dokonywana jest normalizacja geometrii twarzy - wyznaczane są środki oczu oraz kąt nachylenia głowy i względem ich wykrywana jest rotacja obrazu uzyskująca poziomą linię oczu. Jest to krok wymagany przed podaniem do modelu wykrywającego emocje, który został wytrenowany na zdjęciach frontalnych i wymaga wyrównanej twarzy do poprawnej detekcji.
+
+=== Detekcja emocji <emotion-detection>
+Znormalizowany geometrycznie obraz trafia do modułu rozpoznawania emocji. Do tego zadania została wykorzystana konwolucyjna sieć neuronowa (model Facial Emotion Recognition @facial_emotion_recognition_lib wytrenowana na zbiorze @goodfellow2013challenges), która klasyfikuje wyraz twarzy do jednej z siedmiu podstawowych kategorii: złość, obrzydzenie, strach, radość, smutek, zaskoczenie oraz wyraz neutralny. Model zwraca wektor prawdopodobieństw (z dystrybucji Softmax) określający pewność modelu co do wystąpienia każdej z wyżej wymienionych emocji.
+
+=== Wynik potoku przetwarzania <final-feature-vector>
+Z każdej analizowanej klatki uzyskiwany jest wektor cech, w którego skład wchodzą:
+- *Globalna pozycja głowy* - współrzędne środka ramki ograniczającej twarz (_bounding box_) oraz jej szerokość. Pozwala to modelowi klasyfikacyjnemu na śledzenie ruchów ciała (np. wiercenie się na krześle lub "zastyganie" wynikające ze stresu związanego z kłamstwem) oraz zmiany dystansu od kamery, które zostałyby utracone w procesie kadrowania samej twarzy. 
+- *Morfologia twarzy* - współrzędne 478 punktów charakterystycznych z siatki MediaPipe.
+- *Pozycja głowy* - estymowane kąty Eulera (Pitch, Yaw, Roll) opisujące rotację głowy w trójwymiarowej przestrzeni.
+- *Emocje* - prawdopodobieństwa wystąpienia siedmiu podstawowych emocji.
+- *Optical Flow* - średnia i odchylenie standardowe gęstego przepływu optycznego w osiach X i Y obliczone z użyciem algorytmu Farnebacka względem poprzedniej przetworzonej klatki.
+
+Diagram potoku przetwarzania obrazu został przedstawiony na #link(<pipeline>)[obrazku poniżej].
+
+
+#figure(
+  image("../images/pipeline.drawio.pdf", width: 85%),
+  caption: [
+    Schemat blokowy potoku przetwarzania obrazu.
+  ],
+)<pipeline>
+
 
 == Inżynieria cech <feature-engineering>
+Potok przetwarzania obrazu przedstawiony w poprzedniej sekcji wyciągał informacje z nagrań i przekształcał je na wektory cech. W tym podrozdziale, natomiast, przedstawiony będzie proces transformacji ich w inteligentne wskaźniki, które ułatwią modelom nauczenie się rozpoznawania kłamstwa.
+
+=== Wygładzenie sygnału (Noise reduction and smoothing) <noise-reduction-and-smoothing>
+Surowe dane pochodzące z potoku przetwarzania bywają zaszumione. Klatka po klatce, wartości cech mogą drgać (tzw. _jitter_), a wynika to z ograniczonej dokładności użytych detektorów i algorytmów. Zastosowanie średniej kroczącej (ang. _rolling window average_) o oknie długości 5 klatek na cechach, takich jak pozycja głowy (Pitch, Yaw, Roll) oraz parametry ramki ograniczającej twarz (współrzędne jej środka i jej szerokość) pozwala na usunięcie szumu pomiarowego przy jednoczesnym zachowaniu rzeczywistych ruchów ciała i głowy.
+
+=== Redukcja wymiarowości <dimensionality-reduction>
+Wektory cech uzyskane z potoku przetwarzania składają się z aż 973 elementów na jedną klatkę z nagrania. Bezpośrednie podanie sekwencji zawierających aż tyle cech, przy tak małej ilości próbek (poniżej 1000) wiąże się z ogromnym ryzykiem przeuczenia - model zapamiętałby dokładnie każdą z próbek ze zbioru treningowego ale zupełnie poległby na nowych danych. Z tego powodu, postanowiono zredukować wymiarowość wektorów. Znaczna większość cech (956) to współrzędne landmarków, więc są one idealną podgrupą cech do zredukowania. Na podstawie współrzędnych punktów charakterystycznych wyliczane są odległości między kluczowymi parami:
+- *Oczy* (wskaźnik *EAR* - _Eye Aspect Ratio_): odległość między powiekami,
+- *Usta* (*MAR* - _Mouth Aspect Ratio_): ich szerokość i wysokość,
+- *Brwi*: odległość brwi od oka.
+W ten sposób, zachowując istotną część informacji, udało się zredukować długość wektorów do zaledwie 23 elementów, co stanowi znaczną poprawę względem początkowych 973.
+
+Problemem tego podejścia jest fakt, że te dystanse (w pikselach) zależne są od jakości utworzonego przez YOLO bounding boxa oraz biometrii twarzy danej osoby. Z tego powodu, wszystkie wyliczone dystanse geometryczne dzielone są przez wysokość twarzy zdefiniowaną jako odległość między górnym krańcem czoła a dolnym zwieńczeniem podbródka w danej klatce. Dodatkowo, od każdego wyliczonego dystansu odejmowana jest jego średnia wartość z całego nagrania (_zero-centering_). Dzięki tym zabiegom, model nie będzie uczył się zależności między fizjologią osób a ich szczerością, lecz będzie analizował zmiany tych cech względem stanu spoczynkowego danej osoby, a zatem efektywnie wykrywał mikroekspresje.
+
+=== Analiza dynamiki i prędkości cech (_Velocity Features_) <velocity-features>
+Surowe koordynaty obszaru twarzy same w sobie nie są zbytnio informatywne. Fakt, że twarz znajduje się na lewej połowie klatki nie niesie za sobą znaczącej informacji o szczerości wypowiedzi. Obliczenie pierwszej pochodnej (a de facto prędkości zmiany położenia twarzy) pozwala na wykrycie nerwowości ruchów oraz gwałtowności reakcji.
+
+=== Augmentacja danych <data-augmentation>
+Do finalnego wektora uzyskanego z użyciem wyżej opisanych technik dodawany jest losowy szum gaussowski o odchyleniu standardowym 0,05. Zapobiega to przeuczeniu się sieci na specyficznych, dokładnych wartościach liczbowych i zmusza ją do nauki ogólnych wzorców, co zwiększa odporność na błędy detekcji w warunkach rzeczywistych, a zarazem wspiera regularyzację modelu.
+
+== Strategia podziału danych i walidacji <data-split-strategy>
+Dane dzielone są na trzy podzbiory: 
+- Zbiór treningowy (80% próbek) - jest używany bezpośrednio w trakcie nauki modelu jako jego wejście, służąc do optymalizacji wag modelu,
+- Zbiór walidacyjny (10% próbek) - służy do ewaluacji skuteczności modelu w trakcie treningu,
+- Zbiór testowy (10% próbek) - używany jest do finalnego sprawdzenia skuteczności wytrenowanego już modelu. 
+
+Podział losowy wszystkich próbek skutkowałby prawdopodobnym wystąpieniem nagrań jednej osoby w ponad jednym zbiorze. Takie zjawisko, zwane wyciekiem tożsamości/danych (ang. _identity/data leakage_), może mieć katastrofalne konsekwencje - model nauczyłby się mimiki konkretnych osób zamiast uczyć się uniwersalnych wskaźników kłamstwa, co zwiększyłoby jego skuteczność, ale nie w sposób pożadany - dokładność na nowych danych byłaby wciąż niska. Aby temu zapobiec, dane zostały podzielone z wykorzystaniem podejścia _Subject Independent_, gdzie każdej osobie przydzielony został identyfikator, a następnie nagrania zostały podzielone w rozłączne grupy względem nich.
 
 == Normalizacja i przygotowanie sekwencji <normalization-and-sequence-preparation>
+
+=== Normalizacja danych (_MinMaxScaling_) <data-normalization>
+Różne grupy cech mają bardzo odmienne zakresy wartości. Emocje są prawdopodobieństwami z zakresu $[0,1]$, a kąty głowy (Pitch, Yaw, Roll) są w stopniach $[-90, 90]$. Podanie takich danych do sieci neuronowej bez skalowania spowodowałoby, że cechy o większych wartościach zdominowałyby proces uczenia, a subtelne sygnały nie byłyby w ogóle brane pod uwagę. W celu wyrównania zakresów wartości cech zastosowano skalowanie liniowe do przedziału $[-1,1]$ z użyciem `MinMaxScaler` z bibliotek `scikit-learn`. Funkcje aktywacji powszechnie używane w sieciach rekurencyjnych (takie jak tangens hiperboliczny `tanh`) operują właśnie na takim zakresie. Dopasowanie danych treningowych do tego zakresu przyspiesza trening. 
+
+W projekcie zostały użyte 4 skalery do oddzielnego przeskalowania różnych grup cech, odpowiednio kolumny dotyczące:
+- Optical Flow,
+- emocji,
+- rotacji głowy,
+- pozycji bounding boxa.
+Skalowanie dystansów między punktami charakterystycznymi nie było konieczne, ze względu na opisane wcześniej techniki - wartości już są w odpowiednim zakresie.
+
+Skalery zostały dopasowane (`fit`) wyłącznie na zbiorze treningowym, a następnie przy użyciu wyliczonych już parametrów nastąpiło przekształcenie (`transform`) zbioru testowego i walidacyjnego. Taka strategia zapobiega wyciekowi danych. Gdyby skaler został dopasowany na wszystkich danych, model w trakcie treningu poznałby globalną dystrybucję wartości cech, co sztucznie zawyżyłoby wyniki.
+
+=== Przygotowanie sekwencji <sequence-preparation>
+Nagrania wideo naturalnie mają różne czasy trwania. Sieci neuronowe trenowane paczkami danych (_batch_) wymagają jednak tensorów o regularnych kształtach (prostokątnych macierzy). W celu ujednolicenia długości sekwencji wykorzystano technikę paddingu, w której wszystkie próbki w ramach jednego batcha zostają wydłużone do wyrównania z najdłuższym nagraniem z paczki. Brakujące klatki zostają wypełnione stałą wartością $-10$, która została specjalnie wybrana spoza zakresu wartości cech w celu odróżnienia jej od nich. Wartość ta jest traktowana jako pusta informacja. Aby model nie uczył się na sztucznym dopełnieniu, generowany jest dodatkowy wektor (maska) informujący o rzeczywistej długości każdej z sekwencji. Dzięki temu sieć rekurencyjna GRU wie, w którym momencie zatrzymać aktualizację stanu ukrytego dla danej próbki.
+
+Finalnie wektory cech (trzymane wcześniej w numpy arrays) konwertowane są do tensorów PyTorch, które są natywną strukturą danych dla operacji na karcie graficznej GPU, gdzie wykonywany jest trening sieci neuronowych.
+
+#todo[normalizacja danych real life przed transfer learning]
