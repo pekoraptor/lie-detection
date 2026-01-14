@@ -110,8 +110,8 @@
   include "content/LiteratureReview.typ"
   include "content/Data.typ"
   include "content/Implementation.typ"
+  include "content/Experiments.typ"
   include "content/Website.typ"
-  // include "content/Analysis.typ"
   // include "content/Conclusion.typ"
 
   // --- Acknowledgements ---
