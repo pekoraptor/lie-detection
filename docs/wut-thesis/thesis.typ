@@ -108,8 +108,9 @@
   // include "content/Tutorial.typ" // Some trivial, but useful snippets
   include "content/Introduction.typ"
   include "content/LiteratureReview.typ"
-  // include "content/Methodology.typ"
   include "content/Data.typ"
+  include "content/Implementation.typ"
+  include "content/Website.typ"
   // include "content/Analysis.typ"
   // include "content/Conclusion.typ"
 
