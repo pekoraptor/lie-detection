@@ -112,6 +112,8 @@ Dane dzielone są na trzy podzbiory:
 
 Podział losowy wszystkich próbek skutkowałby prawdopodobnym wystąpieniem nagrań jednej osoby w ponad jednym zbiorze. Takie zjawisko, zwane wyciekiem tożsamości/danych (ang. _identity/data leakage_), może mieć katastrofalne konsekwencje - model nauczyłby się mimiki konkretnych osób zamiast uczyć się uniwersalnych wskaźników kłamstwa, co zwiększyłoby jego skuteczność, ale nie w sposób pożadany - dokładność na nowych danych byłaby wciąż niska. Aby temu zapobiec, dane zostały podzielone z wykorzystaniem podejścia _Subject Independent_, gdzie każdej osobie przydzielony został identyfikator, a następnie nagrania zostały podzielone w rozłączne grupy względem nich.
 
+W przypadku zbioru @silesian, ze względu na ustrukturyzowany przebieg pozyskiwania nagrań (każdy uczestnik nagrywał 3 wypowiedzi szczere i 7 kłamstw), taki podział naturalnie zachowywał globalną dystrybucję etykiet w każdym z podzbiorów. Natomiast dla zbioru @real_life_ddd, gdzie każde nagranie przedstawia inną osobę, wymagana była jawna stratyfikacja podziału, aby wymusić równomierny rozkład etykiet w zbiorze treningowym, walidacyjnym i testowym.
+
 == Normalizacja i przygotowanie sekwencji <normalization-and-sequence-preparation>
 
 === Normalizacja danych (_MinMaxScaling_) <data-normalization>
@@ -130,5 +132,3 @@ Skalery zostały dopasowane (`fit`) wyłącznie na zbiorze treningowym, a nastę
 Nagrania wideo naturalnie mają różne czasy trwania. Sieci neuronowe trenowane paczkami danych (_batch_) wymagają jednak tensorów o regularnych kształtach (prostokątnych macierzy). W celu ujednolicenia długości sekwencji wykorzystano technikę paddingu, w której wszystkie próbki w ramach jednego batcha zostają wydłużone do wyrównania z najdłuższym nagraniem z paczki. Brakujące klatki zostają wypełnione stałą wartością $-10$, która została specjalnie wybrana spoza zakresu wartości cech w celu odróżnienia jej od nich. Wartość ta jest traktowana jako pusta informacja. Aby model nie uczył się na sztucznym dopełnieniu, generowany jest dodatkowy wektor (maska) informujący o rzeczywistej długości każdej z sekwencji. Dzięki temu sieć rekurencyjna GRU wie, w którym momencie zatrzymać aktualizację stanu ukrytego dla danej próbki.
 
 Finalnie wektory cech (trzymane wcześniej w numpy arrays) konwertowane są do tensorów PyTorch, które są natywną strukturą danych dla operacji na karcie graficznej GPU, gdzie wykonywany jest trening sieci neuronowych.
-
-#todo[normalizacja danych real life przed transfer learning]
