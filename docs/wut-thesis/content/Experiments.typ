@@ -66,4 +66,189 @@ Implementacja złożonych sieci neuronowych jest podatna na błędy, które nie 
 
 W tym celu, wytrenowano autorski model BiGRU z mechanizmem atencji z użyciem pojedynczej paczki danych (_batch_) ze zbioru treningowego, składającej się z 16 próbek. Taki trening powinien doprowadzić do całkowitego przeuczenia. Prawidłowo zaimplementowana architektura posiadająca tysiące trenowalnych parametrów powinna bez żadnego problemu zapamiętać tak małą ilość danych osiągając idealną skuteczność na paczce użytej do treningu.
 
-Jak przedstawiono na powyższej krzywej uczenia, model bardzo szybko zredukował stratę do wartości bliskich zeru. Wszystkie próbki zostały bezbłednie sklasyfikowane, o czym świadczy accuracy równe `1.0`. Dzięki temu, potwierdzono, że dane poprawnie płyną przez wszystkie warstwy sieci, a gradienty są precyzyjnie obliczane i aktualizują wagi w przewidywany sposób. Oznacza to także, że architektura ma wystarczającą pojemność informacyjną, żeby nauczyć się zależności między cechami a etykietami. Pozytywny wynik testu pozwolił na rozpoczęcie właściwego procesu uczenia na pełnym zbiorze treningowym.
+#figure( 
+  image("../images/overfit_check.png", 
+  width: 100%
+  ), 
+  caption: [Krzywe uczenia uzyskane w procesie _Overfit Check_], 
+) <overfit-check-learning-curve>
+
+Jak przedstawiono na #link(<overfit-check-learning-curve>)[powyższej krzywej uczenia], model bardzo szybko zredukował stratę do wartości bliskich zeru (w 100 epok). Wszystkie próbki zostały bezbłednie sklasyfikowane, o czym świadczy accuracy równe `1.0`. Dzięki temu, potwierdzono, że dane poprawnie płyną przez wszystkie warstwy sieci, a gradienty są precyzyjnie obliczane i aktualizują wagi w przewidywany sposób. Oznacza to także, że architektura ma wystarczającą pojemność informacyjną, żeby nauczyć się zależności między cechami a etykietami. Pozytywny wynik testu pozwolił na rozpoczęcie właściwego procesu uczenia na pełnym zbiorze treningowym.
+
+== Analiza procesu uczenia i skuteczności modelu autorskiego <training-analysis>
+Przedstawione w tym podrozdziale wyniki zostały uzyskane podczas treningu autorskiego modelu BiGRU z mechanizmem atencji na zbiorze @silesian z użyciem hiperparametrów przedstawionych w #link(<hyperparameters-summary>)[sekcji zamykającej rozdział 4].
+
+Celem analizy przebiegu procesu uczenia jest weryfikacja poprawności doboru hiperparametrów, skuteczności polityki treningowej `OneCycleLR` oraz ocena zdolności modelu do generalizacji wiedzy. Po każdej epoce monitorowane były metryki jakościowe, co pozwoliło na ocenę stabilności zbieżności algorytmu optymalizacyjnego. Poniższa sekcja prezentuje analizę wartości tych metryk w czasie treningu oraz finalną ocenę skuteczności modelu na zbiorze testowym.
+
+=== Dynamika procesu uczenia (_Learning Curves_) <learning-curves>
+#figure(
+  grid(
+    columns: (1fr, 1fr),
+    gutter: 1mm,
+    image("../images/training_fixed_scaling/loss_curve.png", width: 100%),
+    image("../images/training_fixed_scaling/metrics_curve.png", width: 100%),
+  ),
+  caption: [
+    Krzywe uczenia dla modelu BiGRU na zbiorze @silesian.
+    Po lewej: przebieg funkcji straty (`BCEWithLogitsLoss`).
+    Po prawej: przebieg metryki AUC ROC oraz F1 Score.
+  ],
+) <learning-curves-plots>
+
+Na wykresie funkcji straty widoczny jest wpływ polityki `OneCycleLR`. Na początku, niskie startowe LR powoduje wolny spadek wartości funkcji straty, po czym następuje przyśpieszenie (faza _warm-up_). Pod koniec treningu widoczne jest ponowne spowolnienie, ponieważ w fazie _annealing_ długość kroku jest redukowana. Podczas całego procesu uczenia, wartość funkcji straty nie spadła blisko zera, co oznacza, że maksymalna wartość hiperparametru _learning rate_ została dobrana prawidłowo i nie wystąpiło zjawisko znacznego przeuczenia. Wahania widoczne na krzywej prawdopodobnie są spowodowane stosunkowo niskim rozmiarem paczki danych, ale nie powinno to negatywnie wpłynąć na skuteczność modelu.
+
+Wysoka początkowa wartość F1 Score na zbiorze walidacyjnym (ok. `0.81`) spowodowana została przez imbalans klas i inicjalizację wag biasu klasyfikatora. Niemniej jednak, wartość tej metryki powoli wzrasta (głównie w środkowej fazie treningu za sprawą użytej polityki treningowej), osiągając maksimum bliskie wartości `0.85`. Pole pod krzywą ROC na początku treningu oscylowało w okolicach losowości - `0.5`. Oznacza to, że model w początkowej fazie nauki nie rozróżniał jeszcze klas. Jednak, po ok. 15 epokach, ta wartość zaczęła stosunkowo stabilnie rosnąć, dochodząc aż do prawie `0.72`. Tak wysoka wartość sugeruje, że wytrenowany już model faktycznie nauczył się separować kłamstwa od szczerych wypowiedzi.
+
+#figure(
+  image("../images/training_fixed_scaling/threshold_curve.png", width: 70%),
+  caption: [Przebieg optymalnego progu decyzyjnego.]
+) <threshold-curve>
+
+Z analizy zmienności optymalnego progu decyzyjnego przedstawionej na #link(<threshold-curve>)[powyższym wykresie] można także wyciągnąć interesujące wnioski.Przez pierwsze 15 epok wykres zmian progu decyzyjnego jest płaski i trzyma się minimalnej dopuszczonej wartości `0.1`. Idealnie pokrywa się to z wykresem AUC, który w tym czasie wskazywał na losowe zgadywanie. Model w tej fazie dopiero "się rozgrzewał", ucząc się czym są poszczególne cechy, ale jeszcze nie zauważając zależności między nimi. 
+
+Gdy AUC zaczęło rosnąć (model zaczyna dostrzegać różnice między klasami), optymalny próg decyzyjny skakał między wartościami `0.1` i `0.6`. Jest to efekt wysokiego LR w tej fazie treningu. Od epoki 45, wahania zaczęły się wygaszać, a próg ustabilizował się na poziomie ok. `0.27`. Model w tym momencie zakończył już naukę cech i tylko delikatnie się dostrajał. Finalny próg jest znacznie niższy od domyślnego `0.5` dowodząc niezbędności zastosowania techniki _threshold tuning_. Ze względu na niezbalansowanie zbioru i specyfikę funkcji straty, model jest "nieśmiały" w swoich predykcjach. Sztywne przyjęcie domyślnego progu skutkowałoby nieoptymalnymi finalnymi wartościami metryk F1 Score i Accuracy.
+
+=== Wyniki na zbiorze testowym i porównanie z modelem bazowym <bigru-test-results-and-baseline-comparison>
+W tabeli poniżej przedstawiono wyniki opisujące dokładność predykcji najlepszego uzyskanego modelu (na podstawie metryki AUC) z epoki 51 na zbiorze testowym. Dla porównania w tabeli umieszczono także wyniki osiągnięte przez model bazowy Random Forest.
+
+#figure(
+  table(
+    columns: (1fr, 1fr, 1fr),
+    inset: 10pt,
+    align: center + horizon,
+    fill: (_, row) => if row == 0 { luma(240) },
+    table.header(
+      [*Metryka*], [*Random Forest (Baseline)*], [*BiGRU + Attention*]
+    ),
+    table.hline(),
+    [Accuracy], [0.7184], [0.6146],
+    [F1 Score], [0.8343], [0.7448],
+    [AUC ROC], [0.6393], [0.5234],
+    table.hline(),
+  ),
+  caption: [Zestawienie wyników końcowych modelu autorskiego z modelem bazowym na zbiorze testowym Silesian.],
+) <results-comparison-silesian>
+
+Mimo obiecujących wyników na etapie walidacji (AUC równe ok. `0.72`), finalny model poradził sobie z inferencją na zbiorze testowym znacznie gorzej, a także niestety gorzej niż model bazowy. W kontraście do wyników walidacyjnych, na zbiorze testowym AUC spadło do poziomu zaledwie `0.52` - wynik zbliżony do losowego zgadywania. Oznacza to, że model dopasował się do specyfiki osób ze zbioru walidacyjnego, ale nie nauczył się w pełni rozpoznawać uniwersalnych wskaźników kłamstwa. Wskazuje to na trudność w generalizacji wyuczonych wzorców na nowe osoby, mimo zastosowania technik regularyzacji w postaci warstw `Dropout` oraz mechanizmu zanikania wag (_weight decay_).
+
+=== Analiza macierzy pomyłek (_Confusion Matrix_) i histogramu prawdopodobieństwa <silesian-confusion-matrix-and-probability-histogram-analysis>
+W celu zbadania nietypowego zjawiska wysokiego F1 Score przy tak niskim AUC wygenerowano macierz pomyłek widoczną #link(<silesian-confusion-matrix>)[poniżej]. Aż 80.6% kłamców zostało sklasyfikowana poprawnie, ale 82% osób mówiących prawdę także zostało oskarżone o nieszczerość. Model wykazuje silną tendencję do klasyfikowania próbek jako kłamstwo w przypadku niepewności (tzw. bias w stronę klasy większościowej). Nie znajdując silnych sygnałów w danych, przyjmuje on bezpieczną strategię obstawiania klasy większościowej (kłamstwa). 
+
+#figure(
+  image("../images/training_fixed_scaling/confusion_matrix_test.png", width: 50%),
+  caption: [Macierz pomyłek wytrenowanego modelu BiGRU+Attention na podzbiorze testowym zbioru @silesian.]
+) <silesian-confusion-matrix>
+
+Potwierdza to także histogram, na którym rozkłady prawdopodobieństw dla prawdy i kłamstwa w dużym stopniu na siebie nachodzą, uniemożliwiając wyznaczenie skutecznej granicy decyzyjnej.
+
+#figure(
+  image("../images/training_fixed_scaling/prob_histogram.png", width: 70%),
+  caption: [Histogram prawdopodobieństw predykcji modelu BiGRU+Attention na podzbiorze testowym zbioru @silesian.]
+) <silesian-probability-histogram>
+
+Wnioskiem z eksperymentu jest to, że proste modele działające na zagregowanych statystykach cech (Random Forest) radzą sobie lepiej niż złożone modele sekwencyjne. Prawdopodobnie, zostało to spowodowane niską liczebnością zbioru @silesian, która okazała się niewystarczająca do wytrenowania tysięcy parametrów tak rozbudowanego modelu głębokiego.
+
+== Transfer wiedzy (ang. _transfer learning_) <transfer-learning>
+Celem tego podrozdziału jest głębsze zbadania zdolności generalizacji modelu i weryfikacja hipotezy o negatywnym wpływie laboratoryjnych wymuszonych kłamstw low-stakes na skuteczność predykcji. Przeprowadzono transfer wiedzy modelu wytrenowanego na zbiorze @silesian, dotrenowując go na @real_life_ddd.
+
+=== Ewaluacja zero-shot <zero-shot-analysis>
+Na początku, wykonano tzw. ewaluację zero-shot - sprawdzenie skuteczności wytrenowanego już modelu na odmiennym zbiorze testowym (pochodzącym z @real_life_ddd). Wyniki zostały zamieszczone w #link(<rl-zero-shot>)[poniższej tabeli oraz macierzy pomyłek].
+
+#figure(
+  grid(
+    columns: (1fr, 1fr),
+    gutter: 5mm,
+    image("../images/transfer_learning_scaled/confusion_matrix_real_life_test_zero_shot.png", width: 100%),
+    table(
+      columns: (1fr, 1fr),
+      inset: 12pt,
+      align: horizon,
+      fill: (_, row) => if row == 0 { luma(240) },
+      table.header(
+        [*Metryka*], [*Wartość*]
+      ),
+      table.hline(),
+      [Accuracy], [0.4876],
+      [F1 Score], [0.6517],
+      [AUC Score], [0.5276],
+      [Precision], [0.4957],
+      [Recall], [0.9508],
+      table.hline(),
+    ),
+  ),
+  caption: [
+    Statystyki uzyskane z ewaluacji zero-shot na zbiorze @real_life_ddd.
+    Po lewej: macierz pomyłek.
+    Po prawej: metryki jakościowe.
+    ],
+) <rl-zero-shot>
+
+Jak można było się spodziewać, model nie osiągnął zadowalających wyników. Podobnie jak w przypadku ewaluacji na zbiorze testowym z @silesian, przewidywał on kłamstwo dla większości próbek. Wartość AUC jest porównywalna z tą uzyskanym na podzbiorze testowym zbioru oryginalnego, a niższe accuracy w tym przypadku można wytłumaczyć równomiernym rozkładem etykiet. Ewaluacja zero-shot wskazuje na to, że model wytrenowany na danych laboratoryjnych nie jest dobrym klasyfikatorem dla danych rzeczywistych bez ówczesnego dotrenowania.
+
+=== Procedura transferu wiedzy i analiza jego wyników <transfer-learning-analysis>
+Zamiast uczyć model od zera, zastosowano technikę transfer learningu. Zamrożono warstwy BiGRU oraz atencji, aby zachować wytrenowaną już ektrakcję cech. Zdecydowano się na użycie nowej "wyzerowanej" głowy klasyfikacyjnej, której bias został zainicjowany w taki sam sposób jak przy oryginalnym treningu (logarytm stosunku klas). Ponownie, użyto schedulera `OneCycleLR`. Miało to na celu ułatwienie i przyspieszenie treningu. #link(<transfer-learning-curves>)[Poniżej przedstawione zostały krzywe uczenia].
+
+#figure(
+  grid(
+    columns: (1fr, 1fr),
+    gutter: 1em,
+    row-gutter: 1em,
+    image("../images/transfer_learning_scaled/loss_curve.png", width: 100%),
+    image("../images/transfer_learning_scaled/metrics_curve.png", width: 100%),
+    grid.cell(
+      colspan: 2,
+      align: center,
+      image("../images/transfer_learning_scaled/threshold_curve.png", width: 60%) 
+    )
+  ),
+  caption: [
+    Dynamika procesu transfer learningu modelu autorskiego na zbiorze @real_life_ddd. 
+    W górnym rzędzie: przebieg funkcji straty (po lewej) oraz metryk walidacyjnych AUC i F1 (po prawej).
+    U dołu: ewolucja optymalnego progu decyzyjnego w czasie trwania treningu.
+  ],
+) <transfer-learning-curves>
+
+Wartość funkcji straty stabilnie spada (pomijając mocne wahania w ostatniej fazie treningu - prawdopodobnie za wysokie LR na trening wyłącznie warstw klasyfikacyjnych), a AUC bardzo szybko rośnie do poziomu ok. `0.7`. Oznacza to, że cechy wyekstrahowane przez BiGRU na zbiorze @silesian są użyteczne. Wagi sieci rekurencyjnej są poprawnie wytrenowane, dzięki czemu model rozumie ruchy twarzy, a sam klasyfikator musiał tylko nauczyć się podejmować decyzję na ich podstawie. 
+
+Wyniki finalnej ewaluacji dotrenowanego modelu na zbiorze testowym z @real_life_ddd zostały przedstawione #link(<rl-finetuned>)[poniżej].
+
+#figure(
+  grid(
+    columns: (1fr, 1fr),
+    gutter: 5mm,
+    image("../images/transfer_learning_scaled/confusion_matrix_real_life_test_finetuned.png", width: 100%),
+    table(
+      columns: (1fr, 1fr),
+      inset: 12pt,
+      align: horizon,
+      fill: (_, row) => if row == 0 { luma(240) },
+      table.header(
+        [*Metryka*], [*Wartość*]
+      ),
+      table.hline(),
+      [Accuracy], [0.5372],
+      [F1 Score], [0.6818],
+      [AUC Score], [0.7639],
+      [Precision], [0.5217],
+      [Recall], [0.9836],
+      table.hline(),
+    ),
+  ),
+  caption: [
+    Statystyki uzyskane z ewaluacji dotrenowanego modelu na zbiorze testowym z @real_life_ddd.
+    Po lewej: macierz pomyłek.
+    Po prawej: metryki jakościowe.
+    ],
+) <rl-finetuned>
+
+Osiągnięte AUC przewyższyło to uzyskane na oryginalnym zbiorze danych (@silesian), ale jest niższe niż to uzyskane przez Random Forest. Dowodzi to, że wskaźniki kłamstwa są znacznie wyraźniejsze w sytuacjach _high-stakes_ (sala sądowa) niż w _low-stakes_ (laboratorium). Zamrożony ekstraktor cech (BiGRU) skutecznie wykrywa te sygnały, a nowa głowa klasyfikacyjna nauczyła się je intepretować. Warto jednak, zwrócić uwagę na niską wartość Accuracy przy bardzo wysokim Recall. Prawdopodobnie wynika to z faktu, że w warunkach sądowych stres, jak i obciążenie poznawcze towarzyszy zarówno kłamcom, jak i osobom prawdomównym. Model wykrywając silne napięcie, klasyfikuje większość osób jako podejrzane, z czego wynika także niski próg decyzyjny (`0.13`). Mimo to, wysokie AUC dowodzi, że model poprawnie nadaje wyższe prawdopodobieństwo kłamstwa rzeczywistym kłamcom, co jest widoczne także na #link(<rl-finetuned-prob-histogram>)[poniższym histogramie], gdzie rozkłady prawdopodobieństw klas są od siebie lepiej odseparowane niż w przypadku wyników na oryginalnym zbiorze.
+
+#figure(
+  image("../images/transfer_learning_scaled/prob_histogram.png", width: 70%),
+  caption: [Histogram prawdopodobieństw predykcji dotrenowanego modelu BiGRU+Attention na podzbiorze testowym zbioru @real_life_ddd.]
+) <rl-finetuned-prob-histogram>
+
+=== Analiza katastroficznego zapominania <catastrophic-forgetting>
+Jako finalny eksperyment związany z techniką transferu wiedzy, postanowiono sprawdzić czy skuteczność modelu dotrenowany na nagraniach sądowych poprawiła się względem oryginalnie wytrenowanego modelu. Oryginalny klasyfikator na zbiorze testowym @silesian miał AUC równe 0.5279, a po dotrenowaniu wartość tej metryki spadła do 0.4731. Pomimo wysokiej wartości tego wskaźnika na zbiorze testowym @real_life_ddd, wynik spadł tutaj poniżej losowości. Model nie tylko zapomniał, ale zaczął wręcz mylić sygnały ze starego zbioru. 
+
+W @silesian nie ma silnego stresu. Nowa głowa klasyfikacyjna szuka w nagraniach silnych reakcji na stres, ale nie udaje się jej ich znaleźć, przez co produkuje chaotyczne predykcje. Stara głowa natomiast, potrafiła lepiej skupić się na subtelniejszych sygnałach i wykonywać nieco bardziej precyzyjne predykcje. Eksperyment dowodzi, że nie da się skonstruować jednego modelu do klasyfikacji zarówno kłamstw _low-stakes_ i _high-stakes_, gdyż różnica między tymi domenami (ang. _domain gap_) jest zbyt duża.
