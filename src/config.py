@@ -13,10 +13,10 @@ def find_project_root(anchor_file="LICENSE"):
 
 PROJECT_ROOT = find_project_root()
 SILESIAN_DEEP_LIE_DETECTOR_PATH = (
-    PROJECT_ROOT / "model_weights" / "best_model_no_leakage.pt"
+    PROJECT_ROOT / "model_weights" / "bigru_attention_silesian.pt"
 )
 FINETUNED_DEEP_LIE_DETECTOR_PATH = (
-    PROJECT_ROOT / "model_weights" / "best_model_no_leakage_finetuned.pt"
+    PROJECT_ROOT / "model_weights" / "bigru_attention_real_life_finetuned.pt"
 )
 RF_SILESIAN_LIE_DETECTOR_PATH = PROJECT_ROOT / "model_weights" / "rf_silesian.joblib"
 RF_REAL_LIFE_LIE_DETECTOR_PATH = PROJECT_ROOT / "model_weights" / "rf_real_life.joblib"

@@ -211,7 +211,7 @@ __marimo__/
 # datasets
 data/
 processed_data/
-model_weights/
+# model_weights/
 
 # macos specific
 .DS_Store
