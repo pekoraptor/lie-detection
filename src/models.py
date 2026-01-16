@@ -19,7 +19,7 @@ class BiGruAttention(nn.Module):
     def __init__(self, input_dim=23, hidden_dim=16, num_layers=2, dropout=0.4):
         super().__init__()
 
-        self.lstm = nn.GRU(
+        self.gru = nn.GRU(
             input_dim,
             hidden_dim,
             num_layers=num_layers,
@@ -57,7 +57,7 @@ class BiGruAttention(nn.Module):
         packed = nn.utils.rnn.pack_padded_sequence(
             x, lengths.cpu(), batch_first=True, enforce_sorted=False
         )
-        out, _ = self.lstm(packed)
+        out, _ = self.gru(packed)
         out, _ = nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
 
         mask = torch.arange(out.size(1), device=out.device)[None, :] < lengths[

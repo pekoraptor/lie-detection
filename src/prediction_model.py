@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from src.features import preprocess_video_data_rf
-from .config import DEVICE, LIE_DETECTOR_PATH
+from .config import DEVICE
 from .models import BiGruAttention
 
 
