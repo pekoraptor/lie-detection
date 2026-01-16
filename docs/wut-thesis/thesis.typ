@@ -50,7 +50,7 @@
       supervisor: "dr inż. Krystian Radlak",
       // The optional advisor of the thesis, this will be typeset as
       //  `consultation`/`konsultacje` in the titlepage.
-      advisor: "dr inż. Krystian Radlak", // or `none` if there were no advisors
+      advisor: none, // or `none` if there were no advisors
       faculty: "weiti", // see the tutorial section of this thesis for a list of all possible faculty shorthands
       index-number: "325215",
       date: datetime.today(), // not today: datetime(year: 1969, month: 9, day: 6,)

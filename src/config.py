@@ -12,7 +12,15 @@ def find_project_root(anchor_file="LICENSE"):
 
 
 PROJECT_ROOT = find_project_root()
-LIE_DETECTOR_PATH = PROJECT_ROOT / "model_weights" / "final_model.pt"
+SILESIAN_DEEP_LIE_DETECTOR_PATH = (
+    PROJECT_ROOT / "model_weights" / "best_model_no_leakage.pt"
+)
+FINETUNED_DEEP_LIE_DETECTOR_PATH = (
+    PROJECT_ROOT / "model_weights" / "best_model_no_leakage_finetuned.pt"
+)
+RF_SILESIAN_LIE_DETECTOR_PATH = PROJECT_ROOT / "model_weights" / "rf_silesian.joblib"
+RF_REAL_LIFE_LIE_DETECTOR_PATH = PROJECT_ROOT / "model_weights" / "rf_real_life.joblib"
+
 FACE_DETECTOR_PATH = PROJECT_ROOT / "model_weights" / "yolov8n-face.pt"
 SCALERS_PATH = PROJECT_ROOT / "model_weights" / "scalers.joblib"
 

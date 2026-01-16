@@ -67,7 +67,7 @@ Implementacja złożonych sieci neuronowych jest podatna na błędy, które nie 
 W tym celu, wytrenowano autorski model BiGRU z mechanizmem atencji z użyciem pojedynczej paczki danych (_batch_) ze zbioru treningowego, składającej się z 16 próbek. Taki trening powinien doprowadzić do całkowitego przeuczenia. Prawidłowo zaimplementowana architektura posiadająca tysiące trenowalnych parametrów powinna bez żadnego problemu zapamiętać tak małą ilość danych osiągając idealną skuteczność na paczce użytej do treningu.
 
 #figure( 
-  image("../images/overfit_check.png", 
+  image("../images/training/overfit_check.png", 
   width: 100%
   ), 
   caption: [Krzywe uczenia uzyskane w procesie _Overfit Check_], 
@@ -85,8 +85,8 @@ Celem analizy przebiegu procesu uczenia jest weryfikacja poprawności doboru hip
   grid(
     columns: (1fr, 1fr),
     gutter: 1mm,
-    image("../images/training_fixed_scaling/loss_curve.png", width: 100%),
-    image("../images/training_fixed_scaling/metrics_curve.png", width: 100%),
+    image("../images/training/loss_curve.png", width: 100%),
+    image("../images/training/metrics_curve.png", width: 100%),
   ),
   caption: [
     Krzywe uczenia dla modelu BiGRU na zbiorze @silesian.
@@ -100,7 +100,7 @@ Na wykresie funkcji straty widoczny jest wpływ polityki `OneCycleLR`. Na począ
 Wysoka początkowa wartość F1 Score na zbiorze walidacyjnym (ok. `0.81`) spowodowana została przez imbalans klas i inicjalizację wag biasu klasyfikatora. Niemniej jednak, wartość tej metryki powoli wzrasta (głównie w środkowej fazie treningu za sprawą użytej polityki treningowej), osiągając maksimum bliskie wartości `0.85`. Pole pod krzywą ROC na początku treningu oscylowało w okolicach losowości - `0.5`. Oznacza to, że model w początkowej fazie nauki nie rozróżniał jeszcze klas. Jednak, po ok. 15 epokach, ta wartość zaczęła stosunkowo stabilnie rosnąć, dochodząc aż do prawie `0.72`. Tak wysoka wartość sugeruje, że wytrenowany już model faktycznie nauczył się separować kłamstwa od szczerych wypowiedzi.
 
 #figure(
-  image("../images/training_fixed_scaling/threshold_curve.png", width: 70%),
+  image("../images/training/threshold_curve.png", width: 70%),
   caption: [Przebieg optymalnego progu decyzyjnego.]
 ) <threshold-curve>
 
@@ -135,14 +135,14 @@ Mimo obiecujących wyników na etapie walidacji (AUC równe ok. `0.72`), finalny
 W celu zbadania nietypowego zjawiska wysokiego F1 Score przy tak niskim AUC wygenerowano macierz pomyłek widoczną #link(<silesian-confusion-matrix>)[poniżej]. Aż 80.6% kłamców zostało sklasyfikowana poprawnie, ale 82% osób mówiących prawdę także zostało oskarżone o nieszczerość. Model wykazuje silną tendencję do klasyfikowania próbek jako kłamstwo w przypadku niepewności (tzw. bias w stronę klasy większościowej). Nie znajdując silnych sygnałów w danych, przyjmuje on bezpieczną strategię obstawiania klasy większościowej (kłamstwa). 
 
 #figure(
-  image("../images/training_fixed_scaling/confusion_matrix_test.png", width: 50%),
+  image("../images/training/confusion_matrix_test.png", width: 50%),
   caption: [Macierz pomyłek wytrenowanego modelu BiGRU+Attention na podzbiorze testowym zbioru @silesian.]
 ) <silesian-confusion-matrix>
 
 Potwierdza to także histogram, na którym rozkłady prawdopodobieństw dla prawdy i kłamstwa w dużym stopniu na siebie nachodzą, uniemożliwiając wyznaczenie skutecznej granicy decyzyjnej.
 
 #figure(
-  image("../images/training_fixed_scaling/prob_histogram.png", width: 70%),
+  image("../images/training/prob_histogram.png", width: 70%),
   caption: [Histogram prawdopodobieństw predykcji modelu BiGRU+Attention na podzbiorze testowym zbioru @silesian.]
 ) <silesian-probability-histogram>
 
@@ -158,7 +158,7 @@ Na początku, wykonano tzw. ewaluację zero-shot - sprawdzenie skuteczności wyt
   grid(
     columns: (1fr, 1fr),
     gutter: 5mm,
-    image("../images/transfer_learning_scaled/confusion_matrix_real_life_test_zero_shot.png", width: 100%),
+    image("../images/transfer_learning/confusion_matrix_real_life_test_zero_shot.png", width: 100%),
     table(
       columns: (1fr, 1fr),
       inset: 12pt,
@@ -193,12 +193,12 @@ Zamiast uczyć model od zera, zastosowano technikę transfer learningu. Zamrożo
     columns: (1fr, 1fr),
     gutter: 1em,
     row-gutter: 1em,
-    image("../images/transfer_learning_scaled/loss_curve.png", width: 100%),
-    image("../images/transfer_learning_scaled/metrics_curve.png", width: 100%),
+    image("../images/transfer_learning/loss_curve.png", width: 100%),
+    image("../images/transfer_learning/metrics_curve.png", width: 100%),
     grid.cell(
       colspan: 2,
       align: center,
-      image("../images/transfer_learning_scaled/threshold_curve.png", width: 60%) 
+      image("../images/transfer_learning/threshold_curve.png", width: 60%) 
     )
   ),
   caption: [
@@ -216,7 +216,7 @@ Wyniki finalnej ewaluacji dotrenowanego modelu na zbiorze testowym z @real_life_
   grid(
     columns: (1fr, 1fr),
     gutter: 5mm,
-    image("../images/transfer_learning_scaled/confusion_matrix_real_life_test_finetuned.png", width: 100%),
+    image("../images/transfer_learning/confusion_matrix_real_life_test_finetuned.png", width: 100%),
     table(
       columns: (1fr, 1fr),
       inset: 12pt,
@@ -244,7 +244,7 @@ Wyniki finalnej ewaluacji dotrenowanego modelu na zbiorze testowym z @real_life_
 Osiągnięte AUC przewyższyło to uzyskane na oryginalnym zbiorze danych (@silesian), ale jest niższe niż to uzyskane przez Random Forest. Dowodzi to, że wskaźniki kłamstwa są znacznie wyraźniejsze w sytuacjach _high-stakes_ (sala sądowa) niż w _low-stakes_ (laboratorium). Zamrożony ekstraktor cech (BiGRU) skutecznie wykrywa te sygnały, a nowa głowa klasyfikacyjna nauczyła się je intepretować. Warto jednak, zwrócić uwagę na niską wartość Accuracy przy bardzo wysokim Recall. Prawdopodobnie wynika to z faktu, że w warunkach sądowych stres, jak i obciążenie poznawcze towarzyszy zarówno kłamcom, jak i osobom prawdomównym. Model wykrywając silne napięcie, klasyfikuje większość osób jako podejrzane, z czego wynika także niski próg decyzyjny (`0.13`). Mimo to, wysokie AUC dowodzi, że model poprawnie nadaje wyższe prawdopodobieństwo kłamstwa rzeczywistym kłamcom, co jest widoczne także na #link(<rl-finetuned-prob-histogram>)[poniższym histogramie], gdzie rozkłady prawdopodobieństw klas są od siebie lepiej odseparowane niż w przypadku wyników na oryginalnym zbiorze.
 
 #figure(
-  image("../images/transfer_learning_scaled/prob_histogram.png", width: 70%),
+  image("../images/transfer_learning/prob_histogram.png", width: 70%),
   caption: [Histogram prawdopodobieństw predykcji dotrenowanego modelu BiGRU+Attention na podzbiorze testowym zbioru @real_life_ddd.]
 ) <rl-finetuned-prob-histogram>
 

@@ -17,14 +17,27 @@ if str(project_root) not in sys.path:
 from src.video_processing import VideoProcessor
 from src.features import preprocess_video_data
 from src.prediction_model import LieDetector
+from src.config import (
+    SILESIAN_DEEP_LIE_DETECTOR_PATH,
+    FINETUNED_DEEP_LIE_DETECTOR_PATH,
+    RF_SILESIAN_LIE_DETECTOR_PATH,
+    RF_REAL_LIFE_LIE_DETECTOR_PATH,
+)
 
 st.set_page_config(page_title="AI Lie Detector", page_icon="🕵️", layout="centered")
 
+AVAILABLE_MODELS = {
+    "BiGRU+Attention trained on Silesian Deception Dataset": SILESIAN_DEEP_LIE_DETECTOR_PATH,
+    "BiGRU+Attention fine-tuned on Real-Life Deception Dataset": FINETUNED_DEEP_LIE_DETECTOR_PATH,
+    "Random Forest trained on Silesian Deception Dataset": RF_SILESIAN_LIE_DETECTOR_PATH,
+    "Random Forest trained on Real-Life Deception Dataset": RF_REAL_LIFE_LIE_DETECTOR_PATH,
+}
+
 
 @st.cache_resource
-def load_resources():
+def load_resources(model_path):
     video_processor = VideoProcessor()
-    lie_detector = LieDetector()
+    lie_detector = LieDetector(model_path=model_path)
     return video_processor, lie_detector
 
 
@@ -32,9 +45,9 @@ def visualize_attention_weights(weights, fps=30, frame_skip=5):
     time_axis = np.arange(len(weights)) / fps * frame_skip
 
     fig, ax = plt.subplots(figsize=(10, 3))
-    ax.plot(time_axis, attention_weights, color="#FF4B4B", linewidth=2)
+    ax.plot(time_axis, weights, color="#FF4B4B", linewidth=2)
 
-    ax.fill_between(time_axis, attention_weights, color="#FF4B4B", alpha=0.3)
+    ax.fill_between(time_axis, weights, color="#FF4B4B", alpha=0.3)
 
     ax.set_xlabel("Video Time (seconds)")
     ax.set_ylabel("Model Attention Level")
@@ -46,16 +59,10 @@ def visualize_attention_weights(weights, fps=30, frame_skip=5):
 
     st.pyplot(fig)
 
-    max_attn_idx = np.argmax(attention_weights)
+    max_attn_idx = np.argmax(weights)
     peak_time = time_axis[max_attn_idx]
     st.info(f"💡 The model paid the most attention around **{peak_time:.1f} seconds**.")
 
-
-try:
-    video_processor, lie_detector = load_resources()
-except Exception as e:
-    st.error(f"Error loading resources: {e}")
-    st.stop()
 
 st.title("🕵️ AI Lie Detector")
 st.markdown(
@@ -63,6 +70,21 @@ st.markdown(
     Upload a video and let the AI analyze it to detect potential deception based on facial cues.
     """
 )
+
+with st.sidebar:
+    st.header("⚙️ Settings")
+    selected_model_name = st.selectbox(
+        "Select model for analysis:", options=list(AVAILABLE_MODELS.keys()), index=0
+    )
+    selected_model_path = AVAILABLE_MODELS[selected_model_name]
+    st.caption(f"Loaded model: {selected_model_name}")
+
+try:
+    video_processor, lie_detector = load_resources(selected_model_path)
+except Exception as e:
+    st.error(f"Error loading resources: {e}")
+    st.stop()
+
 
 uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
 
@@ -131,14 +153,18 @@ if uploaded_file is not None:
                 st.caption(f"Threshold used: {result['threshold']*100:.2f}%")
                 st.progress(result["probability"])
 
-                with st.expander("Attention Weights Visualization"):
-                    attention_weights = result["attention_weights"].squeeze()
-                    fps = cap.get(cv2.CAP_PROP_FPS)
-                    if fps == 0:
-                        fps = 30
-                    visualize_attention_weights(
-                        attention_weights, fps, video_processor.frame_skip
-                    )
+                if (
+                    "attention_weights" in result
+                    and result["attention_weights"] is not None
+                ):
+                    with st.expander("Attention Weights Visualization"):
+                        attention_weights = result["attention_weights"].squeeze()
+                        fps = cap.get(cv2.CAP_PROP_FPS)
+                        if fps == 0:
+                            fps = 30
+                        visualize_attention_weights(
+                            attention_weights, fps, video_processor.frame_skip
+                        )
         except Exception as e:
             st.error(f"An error occurred during analysis: {e}")
         finally:

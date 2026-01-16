@@ -30,7 +30,7 @@ Klasyczne metody detekcji twarzy na obrazie, takie jak kaskady Haara były rewol
 Najbardziej obiecującym rozwiązaniem jest architektura YOLO (_"You Only Look Once"_) @yolo_2016, którego zaletą jest zaskakująca szybkość wykrywania obiektów. Modele te "patrzą" na obraz tylko jeden raz, co wprowadza ich przewagę nad starszymi modelami (np. R-CNN), które działały dwuetapowo. Najpierw znajdowały one na obrazie regiony, w których mógł występować wykrywany obiekt, a następnie sprawdzały każdy z tych regionów. Niosło to za sobą niemały narzut wydajnościowy. YOLO łączy te dwa etapy w jeden, przetwarzający cały obraz naraz. Jak przedstawiono na schemacie @yolo_grid, sieć dzieli obraz na siatkę `S x S` komórek, z których każda jest odpowiedzialna za wykrycie obiektu, jeśli jego środek znajduje się w jej wnętrzu.
 
 #figure(
-  image("../images/yolo.png", width: 90%),
+  image("../images/literature_review/yolo.png", width: 90%),
   caption: [Schemat architektury sieci YOLO. Źródło: @coll-josifov_phdthesis_2022],
 ) <yolo_grid>
 
@@ -57,7 +57,7 @@ Na podstawie siatki punktów wygenerowanej przez MediaPipe wyliczane są geometr
 - wyliczania kątów Eulera (_Head Pose Estimation_), opisujących rotację głowy w trzech osiach.
 
 #figure(
-  image("../images/face_mesh.png", width: 90%),
+  image("../images/literature_review/face_mesh.png", width: 90%),
   caption: [Siatka punktów wygenerowana przez MediaPipe. Źródło: opracowanie własne korzystając z nagrania z @silesian],
 ) <face_mesh>
 
@@ -88,8 +88,8 @@ Analiza przepływu optycznego jest niezwykle przydatna w detekcji kłamstwa i po
   grid(
     columns: (1fr, 1fr),
     gutter: 1em,
-    image("../images/optical_flow_og.png", width: 100%),
-    image("../images/optical_flow_vis.png", width: 100%),
+    image("../images/literature_review/optical_flow_og.png", width: 100%),
+    image("../images/literature_review/optical_flow_vis.png", width: 100%),
   ),
   caption: [
     Wizualizacja gęstego przepływu optycznego. 
@@ -123,7 +123,7 @@ Kłamstwo to proces dynamiczny naturalnie umiejscowiony w czasie. Ze względu na
 Takie działanie osiągane jest za sprawą zastosowanej pętli sprzężenia zwrotnego, w której wyjście neuronu $y_t$ wraca do niego jako wejście w kolejnym kroku czasowym. Stan ukryty (ang. _hidden state_) $h_t$ służy jako "pamięć" sieci. W każdym kroku czasowym $t$ obliczany jest on korzystając z aktualnego wejścia $x_t$ (cechy z bieżącej klatki) i stanu ukrytego z poprzedniego kroku $h_(t-1)$. W przeciwieństwie do tradycyjnych sieci neuronowych, gdzie każda warstwa ma oddzielne wagi, w RNN te same wagi używane są w każdym kroku czasowym, co pozwala na przetwarzanie sekwencji o dowolnej długości. 
 
 #figure(
-  image("../images/rnn.drawio.pdf", width: 85%),
+  image("../images/diagrams/rnn.drawio.pdf", width: 85%),
   caption: [
     Schemat sieci rekurencyjnej (RNN). 
     Po lewej: reprezentacja zwinięta z pętlą sprzężenia zwrotnego. 
@@ -150,7 +150,7 @@ Według teorii Ekmana opisanej wcześniej w #link(<psychological-aspects-of-lie-
 Liczne zalety tej architektury, w których zawiera się mniejsza liczba parametrów, szybszy trening i mniejsze ryzyko przeuczenia na mniejszych zbiorach (takich jak @silesian) przy zachowaniu skuteczności porównywalnej z LSTM, zadecydowały o oparciu finalnego rozwiązania w tej pracy na architekturze GRU rozszerzonej o dwukierunkowość i mechanizm atencji.
 
 #figure(
-  image("../images/gru.drawio.pdf", width: 90%),
+  image("../images/diagrams/gru.drawio.pdf", width: 90%),
   caption: [
     Schemat komórki GRU (_Gated Recurrent Unit_). 
     Widoczny przepływ sygnałów przez bramkę resetu ($r_t$) oraz bramkę aktualizacji ($z_t$). 

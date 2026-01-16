@@ -74,9 +74,8 @@ Z każdej analizowanej klatki uzyskiwany jest wektor cech, w którego skład wch
 
 Diagram potoku przetwarzania obrazu został przedstawiony na #link(<pipeline>)[obrazku poniżej].
 
-
 #figure(
-  image("../images/pipeline.drawio.pdf", width: 85%),
+  image("../images/diagrams/pipeline.drawio.pdf", width: 85%),
   caption: [
     Schemat blokowy potoku przetwarzania obrazu.
   ],

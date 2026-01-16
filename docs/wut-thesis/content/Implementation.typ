@@ -48,7 +48,7 @@ Klasa `RandomForestClassifier` jest bardzo konfigurowalna - pozwala na znaczne d
 W tym podrozdziale przedstawione zostaną szczegóły techniczne autorskiego modelu głębokiej sieci rekurencyjnej BiGRU wzbogaconej mechanizmem atencji.
 
 #figure(
-  image("../images/bigru_attention.drawio.pdf", width: 100%),
+  image("../images/diagrams/bigru_attention.drawio.pdf", width: 100%),
   caption: [
     Schemat architektury modelu BiGRU z mechanizmem atencji. 
     Wymiary tensorów podano w nawiasach kwadratowych nad strzałkami przepływu danych.

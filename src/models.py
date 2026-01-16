@@ -15,7 +15,7 @@ class Attention(nn.Module):
         return context, weights
 
 
-class LieDetectionModel(nn.Module):
+class BiGruAttention(nn.Module):
     def __init__(self, input_dim=23, hidden_dim=16, num_layers=2, dropout=0.4):
         super().__init__()
 
