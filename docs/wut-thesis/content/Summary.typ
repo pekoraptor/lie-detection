@@ -1,0 +1,27 @@
+#import "../utils.typ": todo, silentheading, flex-caption
+
+= Podsumowanie <thesis-summary>
+Celem niniejszej pracy było stworzenie systemu automatycznej detekcji kłamstwa, łączącego nowoczesne techniki wizji komputerowej i algorytmy sztucznej inteligencji z analizą behawioralną. Rozwiązanie problemu miało wysoce interdyscyplinarny charakter, o czym świadczy, że problem analizy szczerości wypowiedzi znajduje się na pograniczu psychologii, inżynierii danych i uczenia maszynowego. Jednomodalne podejście (analiza wyłącznie na podstawie klatek wideo) do implementacji takiego rozwiązania okazało się nietrywialnym zadaniem z powodu subtelności sygnałów oraz różnic w ekspresji emocjonalnej w zależności od wagi kłamstwa. 
+
+Poniższy rozdział, stanowiący zakończenie pracy, zawiera zestawienie zrealizowanych celów, podsumowanie wniosków uzyskanych z wyników eksperymentalnych, analizę ograniczeń napotkanych podczas realizacji projektu, ocenę praktycznej użyteczności stworzonego rozwiązania oraz propozycje na dalsze badania w tej dziedzinie.
+
+== Synteza zrealizowanych zadań <tasks-summary>
+Udało się zaprojektować, zaimplementować i przetestować system automatycznie oceniający nagrania wideo pod kątem nieszczerości na podstawie analizy wizyjnej. Stworzono autorski potok przetwarzania wideo poczynając od surowego pliku, przez m.in. detekcję twarzy z użyciem modelu YOLO i ekstrakcję 478 punktów charakterystycznych twarzy, kończąc na inżynierii cech. Zaimplementowano i porównano dwa podejścia klasyfikacyjne:
+- Klasyczne: algorytm Random Forest bazujący swoje predykcje na zagregowanych statystykach opisowych.
+- Głębokie: autorski architektura BiGRU z mechanizmem atencji, klasyfikujący nagrania na podstawie analizy sekwencyjnej.
+Zaimplementowano działający interaktywny prototyp systemu w postaci aplikacji webowej, stanowiący użytkowe narzędzie wspomagające w procesie detekcji kłamstwa.
+
+== Kluczowe wnioski z badań <thesis-insights>
+Przeprowadzone eksperymenty wykazały, że podczas oceny prawdomówności wypowiedzi, ważniejsza niż jakość nagrań jest ich treść i kontekst emocjonalny. Zbiór @silesian zawiera nagrania w idealnej jakości technicznej, ale słaby sygnał kłamstwa (_low-stakes_). Nagrania ze zbioru @real_life_ddd, mimo znacznie gorszej jakości, okazały się bardziej wartościowe dla modeli uczenia maszynowego. Potwierdza to wniosek, że waga kłamstwa wraz z silniejszym ładunkiem emocjonalnym była ważniejsza dla algorytmów klasyfikacyjnych niż sama rozdzielczość kamery lub studyjne warunki.
+
+Badania potwierdziły również, że na małych zbiorach danych proste modele klasycznego uczenia maszynowego wygrywają ze skomplikowanymi architekturami, uzyskując lepszą dokładność predykcji oraz większą odporność na przeuczenie. Modele głębokie prawdopodobnie wymagają znacznie większego wolumenu danych, aby w pełni wykorzystać swój potencjał.
+
+Zastosowanie techniki transferu wiedzy okazało się przełomowe dla skuteczności modelu głębokiego. Ewaluacja zero-shot wskazała, że model trenowany wyłącznie na danych laboratoryjnych z @silesian nie posiada zdolności generalizacji na dane rzeczywiste. Jednakże, po wymianie warstwy klasyfikującej i wytrenowaniu jej na nowych danych, osiągnął on satysfakcjonujący wynik AUC na poziomie `0.76`. Dowodzi to, że ekstraktor cech (BiGRU) nauczył się analizować dynamikę twarzy i mowę ciała, wymagał jedynie na nowo nauczyć się interpretować sygnały w nowym kontekście. To w połączeniu z wystąpieniem zjawiska katastroficznego zapominania świadczy o tym, że kłamstwo rzeczywiste i laboratoryjne to dwie zupełnie różne domeny, między którymi jest znaczna przepaść. Nie da się w prosty sposób zrobić jednego modelu do wszystkiego.
+
+== Ocena praktycznego zastosowania opracowanego systemu <practical-application-evaluation>
+Wdrożenie mechanizmu wizualizacji wag atencji pozwoliło na realizację paradygmatu wyjaśnialnej sztucznej inteligencji (XAI), przekształcając system z "czarnej skrzynki" w transparentne i godne zaufania narzędzie analityczne. Jednak, biorąc pod uwagę uzyskane wyniki opisujące skuteczność wytrenowanych modeli, narzędzie to nie może być traktowane jako autonomiczny, bezbłędny detektor kłamstwa. Może być zastosowane, natomiast, do wspomagania człowieka w ręcznej analizie, wskazując momenty zawierające podejrzane zachowania i sugerujące stopień zaufania.
+
+== Proponowane kierunki rozwoju <future-work>
+Opracowane rozwiązanie stanowi solidną bazę do dalszych prac badawczo-rozwojowych. Najbardziej obiecującym kierunkiem rozwoju wydaje się wdrożenie analizy multimodalnej. Ścieżka audio dostarczyłaby informacji o tonie głosu i jego tempie, a transkrypcja wypowiedzi pozwoliłaby na dodatkową weryfikacje wypowiadanych zdań.
+
+Głównym ograniczeniem napotkanym podczas realizacji projektu był rozmiar zbiorów danych. Zwiększenie bazy treningowej umożliwiłoby proponowanemu modelowi skuteczniejszy trening i lepszą generalizację, a także otworzyłoby drzwi na zastosowanie bardziej zaawansowanych architektur jak np. #link(<3D-CNN>)[wcześniej opisana trójwymiarowa sieć konwolucyjna] lub Transformer. Dodatkowo, zastosowanie dedykowanych sieci do wykrywania mikroekspresji zamiast analizy opartej wyłącznie o landmarki i przepływ optyczny z dużym prawdopodobieństwem zwiększyłoby czułość systemu na subtelne sygnały mimiczne.

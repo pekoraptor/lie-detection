@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
+from website.custom_components import custom_progress_bar
 
 
 current_dir = Path(__file__).resolve().parent
@@ -151,7 +152,7 @@ if uploaded_file is not None:
                         st.success("No Lie Detected")
 
                 st.caption(f"Threshold used: {result['threshold']*100:.2f}%")
-                st.progress(result["probability"])
+                custom_progress_bar(result["probability"], result["threshold"])
 
                 if (
                     "attention_weights" in result

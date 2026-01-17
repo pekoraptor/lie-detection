@@ -74,7 +74,7 @@
 
         Three modeling approaches were considered: the classic Random Forest machine learning algorithm, a 3D Convolutional Neural Network (3D-CNN), and the ultimately selected bidirectional recurrent GRU network with an attention mechanism. Extensive feature engineering and transfer learning techniques (pre-training on one dataset and fine-tuning on another) were employed in the training process to improve the model's generalization capabilities.
 
-        The conducted experiments showed that the Random Forest model allowed for the identification of the most prominent behavioral features accompanying deception (e.g., eye movements), while the recurrent network achieved promising results in time series analysis, reaching an AUC of 0.63 on the Silesian dataset, which exceeds the detection capabilities of an average human.
+        The conducted experiments showed that the Random Forest model allowed for the identification of the most prominent behavioral features accompanying deception (achieving AUC of 0.64 on the laboratory dataset), while the recurrent network demonstrated its potential through transfer learning, reaching an AUC of 0.76 on the Real-Life Deception Detection Dataset, significantly exceeding the detection capabilities of an average human.
 
         An integral part of the thesis is a web application developed in the Streamlit framework, allowing the user to upload a video file and receive the model's prediction. The results suggest that computer vision methods can support the credibility assessment process; however, potential practical applications require high-quality, representative training data.
       ],
@@ -85,7 +85,7 @@
 
         Rozważono trzy podejścia modelowe: klasyczny algorytm uczenia maszynowego Random Forest, trójwymiarową sieć neuronową konwolucyjną 3D-CNN oraz finalnie wybraną dwukierunkową sieć rekurencyjną GRU z mechanizmem atencji. W procesie uczenia wykorzystano ekstensywną inżynierię cech oraz technikę transfer learningu (uczenie na jednym zbiorze i dotrenowanie na drugim) w celu poprawy zdolności generalizacji modelu.
 
-        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych, towarzyszących kłamstwu (np. ruchy oczu), natomiast sieć rekurencyjna osiągnęła obiecujące wyniki w analizie sekwencji czasowych, finalnie uzyskując AUC na poziomie 0.63 na zbiorze Silesian Deception Detection Dataset, co znacznie przewyższa zdolności przeciętnego człowieka.
+        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych , towarzyszących kłamstwu (osiągając AUC 0.64 na zbiorze laboratoryjnym), natomiast sieć rekurencyjna wykazała swój potencjał po zastosowaniu transferu wiedzy, uzyskując AUC na poziomie 0.76, co znacznie przewyższa zdolności przeciętnego człowieka.
 
         Integralną częścią pracy jest aplikacja webowa oparta na frameworku Streamlit, pozwalająca użytkownikowi na wgranie pliku wideo i otrzymanie predykcji modelu.
 
@@ -112,7 +112,7 @@
   include "content/Implementation.typ"
   include "content/Experiments.typ"
   include "content/Website.typ"
-  // include "content/Conclusion.typ"
+  include "content/Summary.typ"
 
   // --- Acknowledgements ---
   // You can put your acknowledgements (pol. podziękowania) here.

@@ -61,7 +61,7 @@ Sugeruje to, że w warunkach laboratoryjnych, kłamstwa _low-stakes_ nie objawia
   caption: [Ważność cech: Zbiór @silesian.], 
 ) <sddd-feature-importance>
 
-== Weryfikacja techiczna modelu autorskiego (_Overfit Check_) <overfit-check>
+== Weryfikacja techniczna modelu autorskiego (_Overfit Check_) <overfit-check>
 Implementacja złożonych sieci neuronowych jest podatna na błędy, które nie uniemożliwiają uruchomienie kodu, ale uniemożliwiają skuteczny trening modelu. Do takich niedopatrzeń zaliczają się m.in.: złe wymiary warstw, nieprawidłowe połączenia między nimi oraz problemy z paddowaniem. Najłatwiejszym sposobem na ich wykrycie jest testowy trening na małym podzbiorze danych. Takie podejście trwa zaledwie kilka sekund i od razu można stwierdzić, czy implementacja modelu jest poprawna.
 
 W tym celu, wytrenowano autorski model BiGRU z mechanizmem atencji z użyciem pojedynczej paczki danych (_batch_) ze zbioru treningowego, składającej się z 16 próbek. Taki trening powinien doprowadzić do całkowitego przeuczenia. Prawidłowo zaimplementowana architektura posiadająca tysiące trenowalnych parametrów powinna bez żadnego problemu zapamiętać tak małą ilość danych osiągając idealną skuteczność na paczce użytej do treningu.
@@ -132,7 +132,7 @@ W tabeli poniżej przedstawiono wyniki opisujące dokładność predykcji najlep
 Mimo obiecujących wyników na etapie walidacji (AUC równe ok. `0.72`), finalny model poradził sobie z inferencją na zbiorze testowym znacznie gorzej, a także niestety gorzej niż model bazowy. W kontraście do wyników walidacyjnych, na zbiorze testowym AUC spadło do poziomu zaledwie `0.52` - wynik zbliżony do losowego zgadywania. Oznacza to, że model dopasował się do specyfiki osób ze zbioru walidacyjnego, ale nie nauczył się w pełni rozpoznawać uniwersalnych wskaźników kłamstwa. Wskazuje to na trudność w generalizacji wyuczonych wzorców na nowe osoby, mimo zastosowania technik regularyzacji w postaci warstw `Dropout` oraz mechanizmu zanikania wag (_weight decay_).
 
 === Analiza macierzy pomyłek (_Confusion Matrix_) i histogramu prawdopodobieństwa <silesian-confusion-matrix-and-probability-histogram-analysis>
-W celu zbadania nietypowego zjawiska wysokiego F1 Score przy tak niskim AUC wygenerowano macierz pomyłek widoczną #link(<silesian-confusion-matrix>)[poniżej]. Aż 80.6% kłamców zostało sklasyfikowana poprawnie, ale 82% osób mówiących prawdę także zostało oskarżone o nieszczerość. Model wykazuje silną tendencję do klasyfikowania próbek jako kłamstwo w przypadku niepewności (tzw. bias w stronę klasy większościowej). Nie znajdując silnych sygnałów w danych, przyjmuje on bezpieczną strategię obstawiania klasy większościowej (kłamstwa). 
+W celu zbadania nietypowego zjawiska wysokiego F1 Score przy tak niskim AUC wygenerowano macierz pomyłek widoczną #link(<silesian-confusion-matrix>)[poniżej]. Aż 80.6% kłamców zostało sklasyfikowanych poprawnie, ale 82% osób mówiących prawdę także zostało oskarżone o nieszczerość. Model wykazuje silną tendencję do klasyfikowania próbek jako kłamstwo w przypadku niepewności (tzw. bias w stronę klasy większościowej). Nie znajdując silnych sygnałów w danych, przyjmuje on bezpieczną strategię obstawiania klasy większościowej (kłamstwa). 
 
 #figure(
   image("../images/training/confusion_matrix_test.png", width: 50%),
