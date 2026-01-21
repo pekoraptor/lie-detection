@@ -24,7 +24,7 @@
     `false`. variable to false.
 
   **/
-  let draft = true
+  let draft = false
   let in-print = false
   set-margin-note-defaults(hidden: not draft)
 

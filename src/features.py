@@ -26,7 +26,7 @@ def _load_scalers(scalers_path: str):
     return joblib.load(scalers_path)
 
 
-def calculate_distances(df, dist_scale=100.0, zero_center=True):
+def _calculate_distances(df, dist_scale=100.0, zero_center=True):
     landmark_data = df.filter(regex="^lm_").values.astype(np.float32)
 
     if landmark_data.shape[1] == 0:
@@ -97,7 +97,7 @@ def preprocess_video_data(df):
     raw_data = np.nan_to_num(raw_data, nan=0.0)
     features_list.append(raw_data)
 
-    dist_data = calculate_distances(df)
+    dist_data = _calculate_distances(df)
     features_list.append(dist_data)
 
     box_data = df[BOX_COLS].values.astype(np.float32)

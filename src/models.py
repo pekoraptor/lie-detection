@@ -7,15 +7,15 @@ class Attention(nn.Module):
         super().__init__()
         self.attn = nn.Linear(hidden_dim * 2, 1)
 
-    def forward(self, lstm_out, mask):
-        scores = self.attn(lstm_out).squeeze(-1)
+    def forward(self, gru_out, mask):
+        scores = self.attn(gru_out).squeeze(-1)
         scores = scores.masked_fill(~mask, -1e4)
         weights = torch.softmax(scores, dim=1).unsqueeze(-1)
-        context = torch.sum(weights * lstm_out, dim=1)
+        context = torch.sum(weights * gru_out, dim=1)
         return context, weights
 
 
-class BiGruAttention(nn.Module):
+class BiGRUAttention(nn.Module):
     def __init__(self, input_dim=23, hidden_dim=16, num_layers=2, dropout=0.4):
         super().__init__()
 

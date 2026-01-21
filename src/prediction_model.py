@@ -5,7 +5,7 @@ import numpy as np
 
 from src.features import preprocess_video_data_rf
 from .config import DEVICE
-from .models import BiGruAttention
+from .models import BiGRUAttention
 
 
 class BaseLieDetector(ABC):
@@ -34,7 +34,7 @@ class DeepLieDetector(BaseLieDetector):
                 weights_only=False,
             )
 
-            self.model = BiGruAttention(input_dim=23, hidden_dim=16, dropout=0.4)
+            self.model = BiGRUAttention(input_dim=23, hidden_dim=16, dropout=0.4)
             self.model.load_state_dict(checkpoint["model_state_dict"])
             self.model.to(self.device)
             self.model.eval()
