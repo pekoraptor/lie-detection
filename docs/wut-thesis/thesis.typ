@@ -96,6 +96,10 @@
       en: ("computer vision", "neural networks", "video processing", "truthfulness assessment", "model training", "artificial intelligence", "deep learning"),
       pl: ("wizja komputerowa", "sieci neuronowe", "przetwarzanie video", "ocena prawdomówności", "trening modeli", "sztuczna inteligencja")
     ),
+    declaration: page(
+      margin: 0pt, 
+      image("images/scans/declaration.pdf", width: 100%, height: 100%)
+    ),
   )
 
   // --- Custom Settings ---
