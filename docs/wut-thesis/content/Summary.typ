@@ -5,16 +5,16 @@ Celem niniejszej pracy było stworzenie systemu automatycznej detekcji kłamstwa
 
 Poniższy rozdział, stanowiący zakończenie pracy, zawiera zestawienie zrealizowanych celów, podsumowanie wniosków uzyskanych z wyników eksperymentalnych, analizę ograniczeń napotkanych podczas realizacji projektu, ocenę praktycznej użyteczności stworzonego rozwiązania oraz propozycje na dalsze badania w tej dziedzinie.
 
-== Synteza zrealizowanych zadań <tasks-summary>
+== Podsumowanie zrealizowanych zadań <tasks-summary>
 Udało się zaprojektować, zaimplementować i przetestować system automatycznie oceniający nagrania wideo pod kątem nieszczerości na podstawie analizy wizyjnej. Stworzono autorski potok przetwarzania wideo poczynając od surowego pliku, przez m.in. detekcję twarzy z użyciem modelu YOLO i ekstrakcję 478 punktów charakterystycznych twarzy, kończąc na inżynierii cech. Zaimplementowano i porównano dwa podejścia klasyfikacyjne:
 - Klasyczne: algorytm Random Forest bazujący swoje predykcje na zagregowanych statystykach opisowych.
 - Głębokie: autorski architektura BiGRU z mechanizmem atencji, klasyfikujący nagrania na podstawie analizy sekwencyjnej.
-Zaimplementowano działający interaktywny prototyp systemu w postaci aplikacji webowej, stanowiący użytkowe narzędzie wspomagające w procesie detekcji kłamstwa.
+Zaimplementowano działający interaktywny prototyp systemu w postaci aplikacji webowej, stanowiący użytkowe narzędzie wspomagające w procesie detekcji kłamstwa. Kompletny kod źródłowy rozwiązania, wraz z badawczymi Jupyter Notebookami oraz wagami modeli, został udostępniony w publicznym repozytorium na platformie Github @ryniewicz_lie_detection_code_2026.
 
 == Kluczowe wnioski z badań <thesis-insights>
 Przeprowadzone eksperymenty wykazały, że podczas oceny prawdomówności wypowiedzi, ważniejsza niż jakość nagrań jest ich treść i kontekst emocjonalny. Zbiór @silesian zawiera nagrania w idealnej jakości technicznej, ale słaby sygnał kłamstwa (_low-stakes_). Nagrania ze zbioru @real_life_ddd, mimo znacznie gorszej jakości, okazały się bardziej wartościowe dla modeli uczenia maszynowego. Potwierdza to wniosek, że waga kłamstwa wraz z silniejszym ładunkiem emocjonalnym była ważniejsza dla algorytmów klasyfikacyjnych niż sama rozdzielczość kamery lub studyjne warunki.
 
-Badania potwierdziły również, że na małych zbiorach danych proste modele klasycznego uczenia maszynowego wygrywają ze skomplikowanymi architekturami, uzyskując lepszą dokładność predykcji oraz większą odporność na przeuczenie. Modele głębokie prawdopodobnie wymagają znacznie większego wolumenu danych, aby w pełni wykorzystać swój potencjał.
+Badania potwierdziły również, że na małych zbiorach danych proste modele klasycznego uczenia maszynowego wygrywają ze skomplikowanymi architekturami, uzyskując lepszą dokładność predykcji (ok. `0.72` na zbiorze @silesian oraz ok. `0.79` na @real_life_ddd) oraz większą odporność na przeuczenie. Modele głębokie prawdopodobnie wymagają znacznie większego wolumenu danych, aby w pełni wykorzystać swój potencjał.
 
 Zastosowanie techniki transferu wiedzy okazało się przełomowe dla skuteczności modelu głębokiego. Ewaluacja zero-shot wskazała, że model trenowany wyłącznie na danych laboratoryjnych z @silesian nie posiada zdolności generalizacji na dane rzeczywiste. Jednakże, po wymianie warstwy klasyfikującej i wytrenowaniu jej na nowych danych, osiągnął on satysfakcjonujący wynik AUC na poziomie `0.76`. Dowodzi to, że ekstraktor cech (BiGRU) nauczył się analizować dynamikę twarzy i mowę ciała, wymagał jedynie na nowo nauczyć się interpretować sygnały w nowym kontekście. To w połączeniu z wystąpieniem zjawiska katastroficznego zapominania świadczy o tym, że kłamstwo rzeczywiste i laboratoryjne to dwie zupełnie różne domeny, między którymi jest znaczna przepaść. Nie da się w prosty sposób zrobić jednego modelu do wszystkiego.
 

@@ -74,9 +74,9 @@
 
         Three modeling approaches were considered: the classic Random Forest machine learning algorithm, a 3D Convolutional Neural Network (3D-CNN), and the ultimately selected bidirectional recurrent GRU network with an attention mechanism. Extensive feature engineering and transfer learning techniques (pre-training on one dataset and fine-tuning on another) were employed in the training process to improve the model's generalization capabilities.
 
-        The conducted experiments showed that the Random Forest model allowed for the identification of the most prominent behavioral features accompanying deception (achieving AUC of 0.64 on the laboratory dataset), while the recurrent network demonstrated its potential through transfer learning, reaching an AUC of 0.76 on the Real-Life Deception Detection Dataset, significantly exceeding the detection capabilities of an average human.
+        The conducted experiments showed that the Random Forest model allowed for the identification of the most prominent behavioral features accompanying deception (achieving an Area Under the Receiver Operating Characteristic Curve (AUC) of 0.64 on the laboratory dataset), while the recurrent network demonstrated its potential through transfer learning, reaching an AUC of 0.76 on the Real-Life Deception Detection Dataset, significantly exceeding the detection capabilities of an average human.
 
-        An integral part of the thesis is a web application developed in the Streamlit framework, allowing the user to upload a video file and receive the model's prediction. The results suggest that computer vision methods can support the credibility assessment process; however, potential practical applications require high-quality, representative training data.
+        An integral part of the thesis is a web application developed in the Streamlit framework, allowing the user to upload a video file and receive the model's prediction of whether the video contains deception or not. The results suggest that computer vision methods can support the credibility assessment process; however, potential practical applications require high-quality, representative training data.
       ],
       pl: [
         Celem pracy było zbadanie skuteczności metod wizji komputerowej w automatycznej ocenie prawdomówności osób na podstawie analizy nagrań wideo. W pracy przedstawiono różne podejścia do problemu oraz utworzono docelowe narzędzie umożliwiające inferencję modelu uczenia maszynowego na nagraniach zamieszczonych przez użytkownika końcowego w celu oceny prawdomówności.
@@ -85,9 +85,9 @@
 
         Rozważono trzy podejścia modelowe: klasyczny algorytm uczenia maszynowego Random Forest, trójwymiarową sieć neuronową konwolucyjną 3D-CNN oraz finalnie wybraną dwukierunkową sieć rekurencyjną GRU z mechanizmem atencji. W procesie uczenia wykorzystano ekstensywną inżynierię cech oraz technikę transfer learningu (uczenie na jednym zbiorze i dotrenowanie na drugim) w celu poprawy zdolności generalizacji modelu.
 
-        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych , towarzyszących kłamstwu (osiągając AUC 0.64 na zbiorze laboratoryjnym), natomiast sieć rekurencyjna wykazała swój potencjał po zastosowaniu transferu wiedzy, uzyskując AUC na poziomie 0.76, co znacznie przewyższa zdolności przeciętnego człowieka.
+        Przeprowadzone eksperymenty wykazały, że model Random Forest pozwolił na identyfikację kluczowych cech behawioralnych, towarzyszących kłamstwu (osiągając wartość pola powierzchni pod krzywą Receiver Operating Characteristic - wskaźnik AUC równy 0,64 na zbiorze laboratoryjnym), natomiast sieć rekurencyjna wykazała swój potencjał po zastosowaniu transferu wiedzy, uzyskując AUC na poziomie 0,76, co znacznie przewyższa zdolności przeciętnego człowieka.
 
-        Integralną częścią pracy jest aplikacja webowa oparta na frameworku Streamlit, pozwalająca użytkownikowi na wgranie pliku wideo i otrzymanie predykcji modelu.
+        Integralną częścią pracy jest aplikacja webowa oparta na frameworku Streamlit, pozwalająca użytkownikowi na wgranie pliku wideo i otrzymanie klasyfikacji zawartej w nim wypowiedzi jako prawda bądź kłamstwo.
 
         Wyniki badań sugerują, że metody wizji komputerowej mogą wspomagać proces oceny wiarygodności wypowiedzi, jednak potencjalne praktyczne zastosowania wymagają bardzo dużo reprezentatywnych danych treningowych wysokiej jakości.
       ]

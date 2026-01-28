@@ -6,7 +6,7 @@ Jakość i sposób przygotowania danych są w projektach uczenia maszynowego ró
 == Charakterystyka zbiorów danych <dataset-description>
 W pracy wykorzystano dwa zbiory danych, aby sprawdzić zdolność wybranego rozwiązania do nauki na danych przygotowanych w kontrolowanych warunkach laboratoryjnych, jak i jego generalizację w warunkach rzeczywistych (nagranie zbliżone jakością do tych, które będą zamieszczane przez użytkownika końcowego).
 
-=== Silesian Deception Dataset <silesian-deception-dataset>
+=== Silesian Deception Detection Dataset (SDDD) <silesian-deception-detection-dataset>
 Zbiór @silesian został użyty jako zbiór podstawowy, z którego model uczy się wskaźników kłamstwa. Został on opracowany przez naukowców z Politechniki Śląskiej @radlak_bozek_2015. Zawiera nagrania 101 uczestników (studentów), co zapewnia wystarczająco dużą różnorodność biometryczną twarzy. Próbki danych zostały zebrane w kontrolowanych warunkach, a w szczególności:
 - kontrolowane statyczne oświetlenie,
 - jednolite tło,
@@ -17,7 +17,7 @@ Twórcy @silesian trafnie zauważyli, że w celu pozyskania nagrań zawierający
 
 Nagranie każdego uczestnika zawiera w sobie dziesięć próbek danych. Proces opisany wcześniej był ustrukturyzowany w taki sposób, że uczestnik wypowiadał się dziesięć razy, gdzie pierwsza, druga i ostatnia wypowiedź miała być szczera, a pozostałe - kłamstwami. Z tego powodu zbiór jest silnie niezbalansowany - 70% przykładów to kłamstwa. Taka struktura nagrań wymaga ręcznej ich segmentacji, w czym pomagają załączone pliki o formacie `.eaf`, zawierające m.in. informację o tym w jakich przedziałach czasowych zamyka się pojedyncza wypowiedź. W plikach tych zaznaczone są także odstępstwa od scenariusza - momenty, w których zaszła pomyłka i w miejscu kłamstwa pojawiła się prawda, itp. Takie przykłady musiały zostać odrzucone. Po usunięciu wadliwych próbek, zbiór składa się z 924 przykładów.
 
-=== Real-Life Deception Dataset <real-life-deception-dataset>
+=== Real-Life Deception Detection Dataset <real-life-deception-dataset>
 W przeciwieństwie do nagrań ze zbioru @silesian przygotowanych w warunkach laboratoryjnych, @real_life_ddd @perez-rosas_abouelenien_mihalcea_burzo_2015 składa się z klipów pochodzących z prawdziwych procesów sądowych (głównie z USA) - fragmenty zeznań świadków oraz wyjaśnień oskarżonych. Zbiór zawiera zaledwie 121 nagrań, lecz ze względu na liczebność klas jest niemal idealnie zbalansowany - 61 kłamstw i 60 wypowiedzi szczerych.
 
 Ze względu na okoliczności powstania nagrań (środowisko sali sądowej bez reżysera ani naukowców), są one niezwykle reprezentatywne. Kłamstwa zawarte w filmach są rzeczywistymi i naturalnymi kłamstwami wysokiej wagi (ang. _High-Stakes Lies_). Przedstawieni w nich ludzie kłamią walcząc o swoją przyszłość, reputację, a nawet życie. Takie wypowiedzi wiążą się z ogromnym obciążeniem poznawczym (ang. _cognitive load_) i silnym stresem, co stwarza idealne warunki do wystąpienia silnych i trudnych do ukrycia mikroekspresji oraz mimowolnych ruchów mięśni twarzy, których nie da się zreplikować w kontrolowanych warunkach eksperymentu laboratoryjnego. Dzięki temu zbiór ten pozwala zweryfikować użyteczność modelu w systemach bezpieczeństwa, gdzie celem jest wykrywanie realnych zagrożeń, a nie akademickiego kłamstwa.
@@ -93,9 +93,12 @@ Wektory cech uzyskane z potoku przetwarzania składają się z aż 973 elementó
 - *Oczy* (wskaźnik *EAR* - _Eye Aspect Ratio_): odległość między powiekami,
 - *Usta* (*MAR* - _Mouth Aspect Ratio_): ich szerokość i wysokość,
 - *Brwi*: odległość brwi od oka.
+
+Decyzja o wyborze tych konkretnych obszarów anatomicznych została podyktowana przesłankami psychologicznymi, wynikającymi z omówionych wcześniej teorii Paula Ekmana oraz Mirona Zuckermana. Okolice oczu i brwi są kluczowe dla wykrywania mikroekspresji, a także pozwalają na analizę częstotliwości mrugania, która zmienia się wraz ze wzrostem obciążenia poznawczego. Z kolei analiza okolic ust pozwala na identyfikację subtelnych sygnałów stresu, takich jak zaciskanie warg czy wymuszone uśmiechy, a także umożliwia odróżnienie momentów mówienia od ekspresji mimicznej. Skupienie się na tych rejonach pozwala na odrzucenie szumu informacyjnego pochodzącego z mniej istotnych części twarzy (np. policzków czy brody), które w mniejszym stopniu powiązane są z ekspresją emocjonalną wynikającą z nieszczerości.
+
 W ten sposób, zachowując istotną część informacji, udało się zredukować długość wektorów do zaledwie 23 elementów, co stanowi znaczną poprawę względem początkowych 973.
 
-Problemem tego podejścia jest fakt, że te dystanse (w pikselach) zależne są od jakości utworzonego przez YOLO bounding boxa oraz biometrii twarzy danej osoby. Z tego powodu, wszystkie wyliczone dystanse geometryczne dzielone są przez wysokość twarzy zdefiniowaną jako odległość między górnym krańcem czoła a dolnym zwieńczeniem podbródka w danej klatce. Dodatkowo, od każdego wyliczonego dystansu odejmowana jest jego średnia wartość z całego nagrania (_zero-centering_). Dzięki tym zabiegom, model nie będzie uczył się zależności między fizjologią osób a ich szczerością, lecz będzie analizował zmiany tych cech względem stanu spoczynkowego danej osoby, a zatem efektywnie wykrywał mikroekspresje.
+Problemem tego podejścia jest fakt, że te dystanse (w pikselach) zależne są od jakości utworzonej przez YOLO ramki ograniczającej oraz biometrii twarzy danej osoby. Z tego powodu, wszystkie wyliczone dystanse geometryczne dzielone są przez wysokość twarzy zdefiniowaną jako odległość między górnym krańcem czoła a dolnym zwieńczeniem podbródka w danej klatce. Dodatkowo, od każdego wyliczonego dystansu odejmowana jest jego średnia wartość z całego nagrania (_zero-centering_). Dzięki tym zabiegom, model nie będzie uczył się zależności między fizjologią osób a ich szczerością, lecz będzie analizował zmiany tych cech względem stanu spoczynkowego danej osoby, a zatem efektywnie wykrywał mikroekspresje.
 
 === Analiza dynamiki i prędkości cech (_Velocity Features_) <velocity-features>
 Surowe koordynaty obszaru twarzy same w sobie nie są zbytnio informatywne. Fakt, że twarz znajduje się na lewej połowie klatki nie niesie za sobą znaczącej informacji o szczerości wypowiedzi. Obliczenie pierwszej pochodnej (a de facto prędkości zmiany położenia twarzy) pozwala na wykrycie nerwowości ruchów oraz gwałtowności reakcji.
@@ -118,11 +121,11 @@ W przypadku zbioru @silesian, ze względu na ustrukturyzowany przebieg pozyskiwa
 === Normalizacja danych (_MinMaxScaling_) <data-normalization>
 Różne grupy cech mają bardzo odmienne zakresy wartości. Emocje są prawdopodobieństwami z zakresu $[0,1]$, a kąty głowy (Pitch, Yaw, Roll) są w stopniach $[-90, 90]$. Podanie takich danych do sieci neuronowej bez skalowania spowodowałoby, że cechy o większych wartościach zdominowałyby proces uczenia, a subtelne sygnały nie byłyby w ogóle brane pod uwagę. W celu wyrównania zakresów wartości cech zastosowano skalowanie liniowe do przedziału $[-1,1]$ z użyciem `MinMaxScaler` z bibliotek `scikit-learn`. Funkcje aktywacji powszechnie używane w sieciach rekurencyjnych (takie jak tangens hiperboliczny `tanh`) operują właśnie na takim zakresie. Dopasowanie danych treningowych do tego zakresu przyspiesza trening. 
 
-W projekcie zostały użyte 4 skalery do oddzielnego przeskalowania różnych grup cech, odpowiednio kolumny dotyczące:
+W projekcie zostały użyte 4 niezależne instancje skalerów w celu oddzielnego przeskalowania różnych grup cech, odpowiednio kolumny dotyczące:
 - Optical Flow,
 - emocji,
 - rotacji głowy,
-- pozycji bounding boxa.
+- pozycji prostokąta ograniczającego twarz.
 Skalowanie dystansów między punktami charakterystycznymi nie było konieczne, ze względu na opisane wcześniej techniki - wartości już są w odpowiednim zakresie.
 
 Skalery zostały dopasowane (`fit`) wyłącznie na zbiorze treningowym, a następnie przy użyciu wyliczonych już parametrów nastąpiło przekształcenie (`transform`) zbioru testowego i walidacyjnego. Taka strategia zapobiega wyciekowi danych. Gdyby skaler został dopasowany na wszystkich danych, model w trakcie treningu poznałby globalną dystrybucję wartości cech, co sztucznie zawyżyłoby wyniki.
