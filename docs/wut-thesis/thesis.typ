@@ -64,7 +64,7 @@
     // fields below - both *.en and *.pl
     title: (
       en: "Application of computer vision methods for automatic assessment of truthfulness",
-      pl: "Zastosowanie metod widzenia komputerowego do automatycznej oceny prawdomówności",
+      pl: "Zastosowanie metod wizji komputerowej do automatycznej oceny prawdomówności",
     ),
     abstract: (
       en: [
@@ -94,7 +94,7 @@
     ),
     keywords: (
       en: ("computer vision", "neural networks", "video processing", "truthfulness assessment", "model training", "artificial intelligence", "deep learning"),
-      pl: ("wizja komputerowa", "sieci neuronowe", "przetwarzanie video", "ocena prawdomówności", "trening modeli", "sztuczna inteligencja")
+      pl: ("wizja komputerowa", "sieci neuronowe", "przetwarzanie wideo", "ocena prawdomówności", "trening modeli", "sztuczna inteligencja")
     ),
     declaration: page(
       margin: 0pt, 
